@@ -8,25 +8,25 @@ Grafo::~Grafo()
 {
 }
 
-bool Grafo::set_direcionado(bool direcao)
+void Grafo::set_direcionado(bool direcao)
 {
     in_direcionado = direcao;
-    return in_direcionado;
+    
 }
-bool Grafo::set_ponderado_aresta(bool ponderado)
+void Grafo::set_ponderado_aresta(bool ponderado)
 {
     in_ponderado_aresta = ponderado;
-    return in_ponderado_aresta;
+   
 }
-bool Grafo::set_ponderado_vertice(bool ponderado)
+void Grafo::set_ponderado_vertice(bool ponderado)
 {
     in_ponderado_vertice = ponderado;
-    return in_ponderado_vertice;
+    
 }
-int Grafo::set_ordem(int ordem)
+void Grafo::set_ordem(int ordem)
 {
     ordem = ordem;
-    return ordem;
+    
 }
 bool Grafo::get_direcionado()
 {
@@ -45,6 +45,19 @@ int Grafo::get_ordem()
 {
     return ordem;
 }
+
+void Grafo::adiciona_no(char id_no, int peso)
+{
+    No *no = new No();
+    no->set_id(id_no);
+    if (in_ponderado_vertice) {
+        no->set_peso(peso);
+    }
+    lista_adj.push_back(no);
+}
+
+
+
 
 vector<char> Grafo::fecho_transitivo_direto(char id_no)
 {

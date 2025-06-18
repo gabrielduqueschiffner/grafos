@@ -17,17 +17,18 @@ public:
     ~Grafo();
     
     // Getters e Setters
-    bool set_direcionado(bool direcao);
-    bool set_ponderado_aresta(bool ponderado);
-    bool set_ponderado_vertice(bool ponderado);
-    int set_ordem(int ordem);
+    void set_direcionado(bool direcao);
+    void  set_ponderado_aresta(bool ponderado);
+    void  set_ponderado_vertice(bool ponderado);
+    void set_ordem(int ordem);
 
     bool get_direcionado();
     bool get_ponderado_aresta();
     bool get_ponderado_vertice();
     int get_ordem();
   
-
+    
+    void adiciona_no(char id_no, int peso = 0); // a
 
     vector<char> fecho_transitivo_direto(char id_no); // a
     vector<char> fecho_transitivo_indireto(char id_no); // b
