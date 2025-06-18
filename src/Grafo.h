@@ -15,6 +15,19 @@ class Grafo {
 public:
     Grafo();
     ~Grafo();
+    
+    // Getters e Setters
+    bool set_direcionado(bool direcao);
+    bool set_ponderado_aresta(bool ponderado);
+    bool set_ponderado_vertice(bool ponderado);
+    int set_ordem(int ordem);
+
+    bool get_direcionado();
+    bool get_ponderado_aresta();
+    bool get_ponderado_vertice();
+    int get_ordem();
+  
+
 
     vector<char> fecho_transitivo_direto(char id_no); // a
     vector<char> fecho_transitivo_indireto(char id_no); // b
@@ -29,7 +42,7 @@ public:
     vector<char> periferia(); // h 4
     vector<char> vertices_de_articulacao(); // i
 
-
+private:
     int ordem;
     bool in_direcionado;
     bool in_ponderado_aresta;
