@@ -1,5 +1,17 @@
 #include "No.h"
 
+No::No() {
+    peso = 0; // Inicializa o peso como 0
+    id = '\0'; // Inicializa o id como nulo
+    arestas = vector<Aresta*>(); // Inicializa a lista de arestas vazia
+}
+
+No::~No() {
+    for (Aresta* aresta : arestas) {
+        delete aresta; // Libera a memória alocada para as arestas
+    }
+}
+
 
 void No::set_peso(int peso) {
     this->peso = peso;

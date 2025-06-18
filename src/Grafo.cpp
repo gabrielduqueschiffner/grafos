@@ -8,35 +8,31 @@ Grafo::~Grafo()
 {
 }
 
-void Grafo::set_direcionado(bool direcao)
+void Grafo::set_direcionado(int direcao)
 {
     in_direcionado = direcao;
-    
 }
-void Grafo::set_ponderado_aresta(bool ponderado)
+void Grafo::set_ponderado_aresta(int ponderado)
 {
     in_ponderado_aresta = ponderado;
-   
 }
-void Grafo::set_ponderado_vertice(bool ponderado)
+void Grafo::set_ponderado_vertice(int ponderado)
 {
     in_ponderado_vertice = ponderado;
-    
 }
-void Grafo::set_ordem(int ordem)
+void Grafo::set_ordem(int ordem_grafo)
 {
-    ordem = ordem;
-    
+    ordem = ordem_grafo;
 }
-bool Grafo::get_direcionado()
+int Grafo::get_direcionado()
 {
     return in_direcionado;
 }
-bool Grafo::get_ponderado_aresta()
+int Grafo::get_ponderado_aresta()
 {
     return in_ponderado_aresta;
 }
-bool Grafo::get_ponderado_vertice()
+int Grafo::get_ponderado_vertice()
 {
     return in_ponderado_vertice;
 }
@@ -46,18 +42,35 @@ int Grafo::get_ordem()
     return ordem;
 }
 
+vector<No *> Grafo::get_lista_adj()
+{
+    return lista_adj;
+}
+
 void Grafo::adiciona_no(char id_no, int peso)
 {
     No *no = new No();
     no->set_id(id_no);
-    if (in_ponderado_vertice) {
+    if (in_ponderado_vertice)
+    {
         no->set_peso(peso);
     }
     lista_adj.push_back(no);
 }
 
-
-
+void Grafo::imprime_grafo()
+{
+    cout << "Grafo: " << endl;
+    for (No *no : lista_adj)
+    {
+        cout << "No: " << no->get_id() << " Peso: " << no->get_peso() << endl;
+        for (Aresta *aresta : no->get_arestas())
+        {
+            cout << "  Aresta para No: " << aresta->get_id_no_alvo()
+                 << " Peso: " << aresta->get_peso() << endl;
+        }
+    }
+}
 
 vector<char> Grafo::fecho_transitivo_direto(char id_no)
 {
