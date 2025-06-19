@@ -51,6 +51,7 @@ void Grafo::adiciona_no(char id_no, int peso)
 {
     No *no = new No();
     no->set_id(id_no);
+
     if (in_ponderado_vertice)
     {
         no->set_peso(peso);
@@ -58,17 +59,17 @@ void Grafo::adiciona_no(char id_no, int peso)
     lista_adj.push_back(no);
 }
 
-void Grafo::imprime_grafo()
+void Grafo::imprime_grafo() // ajustar como imprime o peso das arestas para melhor visualizacao
 {
     cout << "Grafo: " << endl;
     for (No *no : lista_adj)
     {
-        cout << "No: " << no->get_id() << " Peso: " << no->get_peso() << endl;
+        cout << no->get_id() << "(" << no->get_peso() << ")" << ": ";
         for (Aresta *aresta : no->get_arestas())
         {
-            cout << "  Aresta para No: " << aresta->get_id_no_alvo()
-                 << " Peso: " << aresta->get_peso() << endl;
+            cout << "-> " << aresta->get_id_no_alvo() << "(" << aresta->get_peso() << ")";
         }
+        cout << endl;
     }
 }
 

@@ -19,7 +19,7 @@ public:
     int get_peso();
     vector<Aresta*> get_arestas();
 
-    void adiciona_aresta(Aresta* aresta);
+    void adiciona_aresta(char id_no_origem, char id_no_alvo, int peso = 0);
 
     char id;
     int peso;
