@@ -8,8 +8,17 @@
 #include "No.h"
 #include <iostream>
 #include <vector>
+#include <unordered_map>
+#include <algorithm>
+#include <fstream>
+#include <sstream>
 
 using namespace std;
+
+
+// Supondo enum para cores:
+enum Color { WHITE = 0, GRAY = 1, BLACK = 2 };
+
 class Grafo
 {
 public:
@@ -30,6 +39,7 @@ public:
 
     void adiciona_no(char id_no, int peso = 0);
     void imprime_grafo();
+    void exportar_grafo_para_arquivo(Grafo* g, const string& nome_arquivo);
 
     vector<char> fecho_transitivo_direto(char id_no);                 // a
     vector<char> fecho_transitivo_indireto(char id_no);               // b
@@ -44,12 +54,22 @@ public:
     vector<char> periferia();                                         // h 4
     vector<char> vertices_de_articulacao();                           // i
 
+
+
+    vector<bool> visitado;
+
+
 private:
     int ordem;
     bool in_direcionado;
     bool in_ponderado_aresta;
     bool in_ponderado_vertice;
     vector<No *> lista_adj;
+
+    void dfs_idx(int idx, vector<char>& visitado,
+                 const unordered_map<char,int>& mapaIdParaIndice);
+
+               
 };
 
 #endif // GRAFO_H
