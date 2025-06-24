@@ -17,7 +17,7 @@ using namespace std;
 
 
 // Supondo enum para cores:
-enum Color { WHITE = 0, GRAY = 1, BLACK = 2 };
+enum Cor { BRANCO = 0, CINZA = 1, PRETO = 2 };
 
 class Grafo
 {
@@ -37,8 +37,18 @@ public:
     int get_ordem();
     vector<No *> get_lista_adj();
 
+    No* encontra_no_por_id(char id) const {
+    for (No* no : lista_adj) {
+        if (no->get_id() == id) return no;
+    }
+    return nullptr;
+}
+
+
     void adiciona_no(char id_no, int peso = 0);
+    void adiciona_aresta(char id_no_origem, char id_no_alvo, int peso);
     void imprime_grafo();
+    void imprime_vector(vector<char> v);
     void exportar_grafo_para_arquivo(Grafo* g, const string& nome_arquivo);
 
     vector<char> fecho_transitivo_direto(char id_no);                 // a
@@ -66,9 +76,18 @@ private:
     bool in_ponderado_vertice;
     vector<No *> lista_adj;
 
-    void dfs_idx(int idx, vector<char>& visitado,
-                 const unordered_map<char,int>& mapaIdParaIndice);
 
+     // Auxiliares DFS árvore
+    void dfs_arvore_recursivo(int indice_no, int indice_pai,
+                              vector<Cor>& cor,
+                              const vector<vector<int>>& adj_indices,
+                              vector<pair<int,int>>& arestas_arvore,
+                              vector<pair<int,int>>& arestas_retorno);
+   
+    void dfs_transitivo_recursivo(int indice_no,
+                                  vector<char>& marcado,
+                                  vector<char>& resultado,
+                                  const unordered_map<char,int>& mapa_id_para_indice);
                
 };
 

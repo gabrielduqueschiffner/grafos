@@ -21,7 +21,8 @@ void Gerenciador::comandos(Grafo* grafo) {
 
             char id_no = get_id_entrada();
             vector<char> fecho_transitivo_direto = grafo->fecho_transitivo_direto(id_no);
-            cout<<"Metodo de impressao em tela nao implementado"<<endl<<endl;
+            cout<<endl<<endl;
+           
 
             if(pergunta_imprimir_arquivo("fecho_trans_dir.txt")) {
                 cout<<"Metodo de impressao em arquivo nao implementado"<<endl<<endl;
@@ -131,7 +132,7 @@ void Gerenciador::comandos(Grafo* grafo) {
            
             cout<<endl<<endl;
             if(pergunta_imprimir_arquivo("arvore_caminhamento_profundidade.txt")) {
-                cout<<"Metodo de impressao em arquivo nao implementado"<<endl;
+               grafo->exportar_grafo_para_arquivo(arvore_caminhamento_profundidade, "arvore_caminhamento_profundidade.txt");
             }
 
             delete arvore_caminhamento_profundidade;
