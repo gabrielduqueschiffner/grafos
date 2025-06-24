@@ -115,7 +115,7 @@ vector<char> Grafo::fecho_transitivo_direto(char id_no)
     marcado[indice_inicio] = 1;
 
     // 3. Chama DFS recursivo para ver todos alcançáveis
-    dfs_transitivo_recursivo(indice_inicio, marcado, resultado, mapa_id_para_indice);
+    dfs_fecho_transitivo_direto(indice_inicio, marcado, resultado, mapa_id_para_indice);
 
     // 4. Retorna vetor de IDs alcançados (ordem de descoberta)
     cout << "Fecho transitivo a partir de '" << id_no << "': ";
@@ -129,7 +129,7 @@ vector<char> Grafo::fecho_transitivo_direto(char id_no)
 
 }
 
-void Grafo::dfs_transitivo_recursivo(int indice_no,
+void Grafo::dfs_fecho_transitivo_direto(int indice_no,
                                      vector<char>& marcado,
                                      vector<char>& resultado,
                                      const unordered_map<char,int>& mapa_id_para_indice)
@@ -143,7 +143,7 @@ void Grafo::dfs_transitivo_recursivo(int indice_no,
         if (!marcado[indice_vizinho]) {
             marcado[indice_vizinho] = 1;
             resultado.push_back(id_vizinho);
-            dfs_transitivo_recursivo(indice_vizinho, marcado, resultado, mapa_id_para_indice);
+            dfs_fecho_transitivo_direto(indice_vizinho, marcado, resultado, mapa_id_para_indice);
         }
     }
 }

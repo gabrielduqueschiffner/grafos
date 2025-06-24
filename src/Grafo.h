@@ -84,7 +84,7 @@ private:
                               vector<pair<int,int>>& arestas_arvore,
                               vector<pair<int,int>>& arestas_retorno);
    
-    void dfs_transitivo_recursivo(int indice_no,
+    void dfs_fecho_transitivo_direto(int indice_no,
                                   vector<char>& marcado,
                                   vector<char>& resultado,
                                   const unordered_map<char,int>& mapa_id_para_indice);
