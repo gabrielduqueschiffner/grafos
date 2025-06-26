@@ -78,11 +78,10 @@ private:
 
 
      // Auxiliares DFS árvore
-    void dfs_arvore_recursivo(int indice_no, int indice_pai,
-                              vector<Cor>& cor,
-                              const vector<vector<int>>& adj_indices,
-                              vector<pair<int,int>>& arestas_arvore,
-                              vector<pair<int,int>>& arestas_retorno);
+   void dfs_arvore_aux(int indice_no,
+                                  vector<bool>& visitado,
+                                  const unordered_map<char,int>& mapa_id_para_indice,vector< pair<char,char>>& tree_edges);
+
    
     void dfs_fecho_transitivo_direto(int indice_no,
                                   vector<char>& marcado,

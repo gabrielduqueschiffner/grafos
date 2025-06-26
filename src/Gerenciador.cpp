@@ -129,10 +129,10 @@ void Gerenciador::comandos(Grafo* grafo) {
 
             char id_no = get_id_entrada();
             Grafo* arvore_caminhamento_profundidade = grafo->arvore_caminhamento_profundidade(id_no);
-           
+            arvore_caminhamento_profundidade->imprime_grafo();
             cout<<endl<<endl;
             if(pergunta_imprimir_arquivo("arvore_caminhamento_profundidade.txt")) {
-               grafo->exportar_grafo_para_arquivo(arvore_caminhamento_profundidade, "arvore_caminhamento_profundidade.txt");
+              grafo->exportar_grafo_para_arquivo(arvore_caminhamento_profundidade, "arvore_caminhamento_profundidade.txt");
             }
 
             delete arvore_caminhamento_profundidade;
