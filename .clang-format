@@ -1,0 +1,4 @@
+BasedOnStyle: LLVM  # ou Google, Chromium, etc.
+IndentWidth: 4      # Mude para o número de espaços desejado
+TabWidth: 4         # Largura do tab
+UseTab: Never       # Usa espaços em vez de tab

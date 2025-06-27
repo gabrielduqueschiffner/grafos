@@ -1,4 +1,5 @@
 #include "No.h"
+#include "types.h"
 
 No::No() {
     peso = 0; // Inicializa o peso como 0
@@ -17,10 +18,10 @@ void No::set_peso(int peso) {
     this->peso = peso;
 }
 
-void No::set_id(char id) {
+void No::set_id(NoId id) {
     this->id = id;
 }
-char No::get_id() {
+NoId No::get_id() {
     return id;
 }
 int No::get_peso() {
@@ -30,7 +31,7 @@ vector<Aresta*> No::get_arestas() {
     return arestas;
 }
 
-void No::adiciona_aresta(char id_no_origem, char id_no_alvo, int peso) {
+void No::adiciona_aresta(NoId id_no_origem, NoId id_no_alvo, int peso) {
 
     Aresta* aresta = new Aresta();
     aresta->set_id_no_origem(id_no_origem);

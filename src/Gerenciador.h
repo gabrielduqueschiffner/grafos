@@ -1,18 +1,21 @@
 #ifndef GERENCIADOR_H
 #define GERENCIADOR_H
 
-#include <iostream>
 #include "Grafo.h"
+#include "types.h"
 #include <algorithm>
+#include <iostream>
 
 using namespace std;
 class Gerenciador {
-public:
-    static void comandos(Grafo* grafo);
-    static char get_id_entrada();
-    static vector<char> get_conjunto_ids(Grafo* grafo, int tam);
-    static bool pergunta_imprimir_arquivo(string nome_arquivo);
+  public:
+    static void iniciar_menu(Grafo *grafo);
+    static NoId get_id_entrada();
+    // Obtém a partir da entrada, um subconjunto de ids para um grafo
+    static vector<NoId> get_subconjunto_ids(Grafo *grafo);
+    static bool perguntar_escrever_arquivo(string nome_arquivo);
+
+    static void fecho_transitivo(Grafo *grafo);
 };
 
-
-#endif //GERENCIADOR_H
+#endif // GERENCIADOR_H

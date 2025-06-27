@@ -4,6 +4,7 @@
 #include <string>
 #include <vector>
 #include "Aresta.h"
+#include "types.h"
 
 
 using namespace std;
@@ -13,15 +14,15 @@ public:
     ~No();
 
     void set_peso(int peso);
-    void set_id(char id);
+    void set_id(NoId id);
 
-    char get_id();
+    NoId get_id();
     int get_peso();
     vector<Aresta*> get_arestas();
 
-    void adiciona_aresta(char id_no_origem, char id_no_alvo, int peso = 0);
+    void adiciona_aresta(NoId id_no_origem, NoId id_no_alvo, int peso = 0);
 
-    char id;
+    NoId id;
     int peso;
     vector<Aresta*> arestas;
 };

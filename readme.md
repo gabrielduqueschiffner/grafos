@@ -52,8 +52,8 @@ Onde *<arquivo_entrada>* é o nome do arquivo que contém as informações do gr
 
 O programa deve apresentar em tela a saída para as seguintes funções:
 
-**A.** **Parâmetro:** um Id de um vértice de um grafo direcionado; **Saída:** o fecho transitivo direto deste vértice.
-**B.** Parâmetro: um Id de um vértice de um grafo direcionado; **Saída:** o fecho transitivo indireto deste vértice.
+**A.** **Parâmetro:** um NoId de um vértice de um grafo direcionado; **Saída:** o fecho transitivo direto deste vértice.
+**B.** Parâmetro: um NoId de um vértice de um grafo direcionado; **Saída:** o fecho transitivo indireto deste vértice.
 **C.** **Parâmetro:** dois IDs de vértices do grafo; **Saída:** o caminho mínimo entre estes dois vértices usando algoritmo de Djkstra;
 **D.** **Parâmetro:** dois IDs de vértices do grafo; **Saída:** o caminho mínimo entre estes dois vértices usando algoritmo de Floyd;
 **E.** **Parâmetro:** um subconjunto X de vértices do grafo; **Saída:** uma Árvore Geradora Mínima sobre o subgrafo vértice-induzido por X usando o algoritmo de Prim;
