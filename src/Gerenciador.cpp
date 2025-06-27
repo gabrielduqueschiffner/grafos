@@ -28,52 +28,56 @@ void Gerenciador::iniciar_menu(Grafo *grafo) {
     switch (resp) {
 
         case 'a': {
-            grafo->fecho_transitivo_direto(get_id_entrada());
-            // imprime sequencia
+            vector<NoId> seq = grafo->fecho_transitivo_direto(get_id_entrada());
+            processa_saida_caminho(seq);
             break;
         }
 
         case 'b': {
-            grafo->fecho_transitivo_indireto(get_id_entrada());
-            // imprime sequencia
+            vector<NoId> seq =
+                grafo->fecho_transitivo_indireto(get_id_entrada());
+            processa_saida_caminho(seq);
             break;
         }
 
         case 'c': {
-            grafo->caminho_minimo_dijkstra(get_id_entrada(), get_id_entrada());
-            // imprime sequencia
+            vector<NoId> seq = grafo->caminho_minimo_dijkstra(get_id_entrada(),
+                                                              get_id_entrada());
+            processa_saida_caminho(seq);
             break;
         }
 
         case 'd': {
-            grafo->caminho_minimo_floyd(get_id_entrada(), get_id_entrada());
-            // imprime sequencia
+            vector<NoId> seq =
+                grafo->caminho_minimo_floyd(get_id_entrada(), get_id_entrada());
+            processa_saida_caminho(seq);
             break;
         }
         
         case 'e': {
-            grafo->arvore_geradora_minima_prim(
+            Grafo* sub = grafo->arvore_geradora_minima_prim(
                 get_subconjunto_ids(grafo));
-            // imprime árvore
+            processa_saida_grafo(sub);
             break;
         }
 
         case 'f': {
-            grafo->arvore_geradora_minima_kruskal(
+            Grafo *sub = grafo->arvore_geradora_minima_kruskal(
                 get_subconjunto_ids(grafo));
-            // imprime árvore
+            processa_saida_grafo(sub);
             break;
         }
 
         case 'g': {
-            grafo->arvore_caminhamento_profundidade(get_id_entrada());
-            // imprime árvore
+            Grafo *sub =
+                grafo->arvore_caminhamento_profundidade(get_id_entrada());
+            processa_saida_grafo(sub);
             break;
         }
 
         case 'h': {
-            grafo->vertices_de_articulacao();
-            // imprime sequencia
+            vector<NoId> seq = grafo->vertices_de_articulacao();
+            processa_saida_caminho(seq);
             break;
         }
 
@@ -99,8 +103,8 @@ NoId Gerenciador::get_id_entrada() {
 
 vector<NoId> Gerenciador::get_subconjunto_ids(Grafo *grafo) {
 
+    // Tentar obter tamanho válido até conseguir
     int tam = -1;
-
     while (tam <= 0 || tam > grafo->get_ordem()) {
         
         string in;
@@ -117,7 +121,7 @@ vector<NoId> Gerenciador::get_subconjunto_ids(Grafo *grafo) {
 
     vector<NoId> ids = {};
 
-    // Até obter a quantidade desejada
+    // Obter IDs da entrada até alcançar a quantidade desejada
     while ((int)ids.size() < tam) {
 
         NoId id_no = get_id_entrada();
@@ -177,5 +181,25 @@ bool Gerenciador::perguntar_escrever_arquivo(string nome_arquivo) {
     default:
         cout << "Resposta invalida" << endl;
         return perguntar_escrever_arquivo(nome_arquivo);
+    }
+}
+
+void Gerenciador::processa_saida_caminho(vector<NoId> sequencia, string nome_arquivo) {
+
+    // imprime sequencia
+
+    if (perguntar_escrever_arquivo(nome_arquivo)) {
+
+        // escreve sequencia
+    }
+}
+
+void Gerenciador::processa_saida_grafo(Grafo *sequencia, string nome_arquivo) {
+
+    // imprime grafo
+
+    if (perguntar_escrever_arquivo(nome_arquivo)) {
+
+        // escreve grafo
     }
 }

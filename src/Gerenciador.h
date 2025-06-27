@@ -16,6 +16,9 @@ class Gerenciador {
     static bool perguntar_escrever_arquivo(string nome_arquivo);
 
     static void fecho_transitivo(Grafo *grafo);
+
+    static void processa_saida_caminho(vector<NoId> sequencia, string nome_arquivo="caminho");
+    static void processa_saida_grafo(Grafo *grafo, string nome_arquivo="grafo");
 };
 
 #endif // GERENCIADOR_H
