@@ -80,7 +80,8 @@ private:
      // Auxiliares DFS árvore
    void dfs_arvore_aux(int indice_no,
                                   vector<bool>& visitado,
-                                  const unordered_map<char,int>& mapa_id_para_indice,vector< pair<char,char>>& tree_edges);
+                                  const unordered_map<char,int>& mapa_id_para_indice, vector<Aresta*>& tree_edges
+);
 
    
     void dfs_fecho_transitivo_direto(int indice_no,

@@ -172,11 +172,169 @@ Grafo *Grafo::arvore_geradora_minima_prim(vector<char> ids_nos)
     return nullptr;
 }
 
-Grafo *Grafo::arvore_geradora_minima_kruskal(vector<char> ids_nos)
-{
-    cout << "Metodo nao implementado" << endl;
-    return nullptr;
+
+
+// ==== Disjoint Set Union (Union–Find) ====
+class UnionFind {
+    vector<int> pai, rank;
+public:
+    UnionFind(int n): pai(n), rank(n,0) {
+        for(int i=0;i<n;++i) pai[i]=i;
+    }
+    int find(int x){
+        if(pai[x]!=x) pai[x]=find(pai[x]);
+        return pai[x];
+    }
+    bool unite(int a, int b){
+        a = find(a);
+        b = find(b);
+        if(a==b) return false;
+        if(rank[a]<rank[b]) swap(a,b);
+        pai[b]=a;
+        if(rank[a]==rank[b]) rank[a]++;
+        return true;
+    }
+};
+
+
+// Grafo* Grafo::arvore_geradora_minima_kruskal(vector<char> ids_nos) {
+//     int m = ids_nos.size();
+//     if (m == 0) return nullptr;
+
+//     // 1) Monta mapa ID -> índice [0..m-1] e cria grafo vazio
+//     unordered_map<char,int> mapa_id_para_indice;
+//     mapa_id_para_indice.reserve(m);
+//     Grafo* grafo_kruskal = new Grafo();
+//     grafo_kruskal->set_direcionado(false);  // MST sempre não-direcionado
+//     grafo_kruskal->set_ponderado_aresta(get_ponderado_aresta());
+//     grafo_kruskal->set_ponderado_vertice(get_ponderado_vertice());
+
+//     for (int i = 0; i < m; ++i) {
+//         mapa_id_para_indice[ ids_nos[i] ] = i;
+//         // copia nós com peso, se houver
+//         No* no_orig = encontra_no_por_id(ids_nos[i]);
+//         int peso_no = no_orig ? no_orig->get_peso() : 0;
+//         grafo_kruskal->adiciona_no(ids_nos[i], peso_no);
+//     }
+
+//     // 2) Coletar arestas internas (sem duplicatas)
+//     struct E { char u,v; int peso; };
+//     vector<E> all_edges;
+//     all_edges.reserve(100);
+//     for (No* no : lista_adj) {
+//         char u = no->get_id();
+//         auto it_u = mapa_id_para_indice.find(u);
+//         if (it_u == mapa_id_para_indice.end()) continue;
+//         for (Aresta* a : no->get_arestas()) {
+//             char v = a->get_id_no_alvo();
+//             auto it_v = mapa_id_para_indice.find(v);
+//             if (it_v == mapa_id_para_indice.end()) continue;
+//             // para não-direcionado, só pegar (u<v) 
+//             if (u < v) {
+//                 all_edges.push_back({u, v, a->get_peso()});
+//             }
+//         }
+//     }
+
+//     // 3) Ordenar arestas por peso (se não ponderado, mantém ordem inserida)
+//     if (get_ponderado_aresta()) {
+//         sort(all_edges.begin(), all_edges.end(),
+//                   [](const E& a, const E& b){ return a.peso < b.peso; });
+//     }
+
+//     // 4) Kruskal com DSU
+//     UnionFind uf(m);
+//     for (auto &e : all_edges) {
+//         int iu = mapa_id_para_indice[e.u];
+//         int iv = mapa_id_para_indice[e.v];
+//         if (uf.unite(iu, iv)) {
+//             // aresta aceita na árvore
+//             grafo_kruskal->adiciona_aresta(e.u, e.v, e.peso);
+            
+//         }
+//     }
+
+//     return grafo_kruskal;
+// }
+
+    
+Grafo* Grafo::arvore_geradora_minima_kruskal(const std::vector<char> ids_nos) {
+    int m = ids_nos.size();
+    if (m == 0) return nullptr;
+
+    // 1) Mapa ID → índice (0..m-1) e criação do grafo vazio
+    std::unordered_map<char,int> mapa_id_para_indice;
+    mapa_id_para_indice.reserve(m);
+    Grafo* grafo_kruskal = new Grafo();
+    grafo_kruskal->set_direcionado(false);
+    grafo_kruskal->set_ponderado_aresta(get_ponderado_aresta());
+    grafo_kruskal->set_ponderado_vertice(get_ponderado_vertice());
+    for (int i = 0; i < m; ++i) {
+        mapa_id_para_indice[ ids_nos[i] ] = i;
+        No* original = encontra_no_por_id(ids_nos[i]);
+        int peso_no = original ? original->get_peso() : 0;
+        grafo_kruskal->adiciona_no(ids_nos[i], peso_no);
+    }
+
+    // 2) Coleta de ponteiros para Aresta existentes, sem duplicatas
+    std::vector<Aresta*> todas_arestas;
+    todas_arestas.reserve(100);
+    for (No* no : lista_adj) {
+        char u = no->get_id();
+        if (!mapa_id_para_indice.count(u)) continue;
+        for (Aresta* a : no->get_arestas()) {
+            char v = a->get_id_no_alvo();
+            if (!mapa_id_para_indice.count(v)) continue;
+            // Em grafo não-direcionado, pega cada par só uma vez: u<v
+            if (u < v) {
+                todas_arestas.push_back(a);
+            }
+        }
+    }
+
+    // 3) Ordena por peso (se ponderado)
+    if (get_ponderado_aresta()) {
+        std::sort(todas_arestas.begin(), todas_arestas.end(),
+                  [](Aresta* a, Aresta* b){
+                      return a->get_peso() < b->get_peso();
+                  });
+    }
+
+    // 4) Union–Find inline
+    std::vector<int> pai(m), altura(m,0);
+    for(int i=0;i<m;++i) pai[i]=i;
+    std::function<int(int)> encontrar = [&](int x){
+        return pai[x]==x ? x : pai[x] = encontrar(pai[x]);
+    };
+    auto unir = [&](int x, int y){
+        x = encontrar(x); y = encontrar(y);
+        if (x==y) return false;
+        if (altura[x]<altura[y]) std::swap(x,y);
+        pai[y]=x;
+        if (altura[x]==altura[y]) altura[x]++;
+        return true;
+    };
+
+    // 5) Kruskal: percorre Aresta*, checa componentes e adiciona ao grafo-árvore
+    for (Aresta* a : todas_arestas) {
+        char u = a->get_id_no_origem();
+        char v = a->get_id_no_alvo();
+        int peso = a->get_peso();
+        int iu = mapa_id_para_indice[u],
+            iv = mapa_id_para_indice[v];
+        if (unir(iu, iv)) {
+            grafo_kruskal->adiciona_aresta(u, v, peso);
+            grafo_kruskal->adiciona_aresta(v, u, peso);
+        }
+    }
+
+    return grafo_kruskal;
 }
+
+
+
+
+
 
 void Grafo::adiciona_aresta(char id_origem, char id_alvo, int peso = 0) {
     No* no_origem = encontra_no_por_id(id_origem);
@@ -196,18 +354,101 @@ void Grafo::adiciona_aresta(char id_origem, char id_alvo, int peso = 0) {
 }
 
 
+// Grafo* Grafo::arvore_caminhamento_profundidade(char id_no) {
+//     int n = lista_adj.size();
+//     if (n == 0) {
+//         cout << "Grafo vazio; nada a percorrer." << endl;
+//         return nullptr;
+//     }
+//     // 1) Mapear ID → índice
+//     unordered_map<char,int> mapa_id_para_indice;
+//     mapa_id_para_indice.reserve(n);
+//     for (int i = 0; i < n; ++i) {
+//         mapa_id_para_indice[ lista_adj[i]->get_id() ] = i;
+//     }
+//     auto it = mapa_id_para_indice.find(id_no);
+//     if (it == mapa_id_para_indice.end()) {
+//         cout << "Nó inicial '" << id_no << "' não encontrado." << endl;
+//         return nullptr;
+//     }
+//     int indice_inicio = it->second;
+
+//     // 2) Vetor de marcados
+//     vector<bool> visitado(n, false);
+
+//     // 3) Coletor de tree-edges
+//     // vector<pair<char,char>> tree_edges;
+//     vector<Aresta*> tree_edges;
+
+//     // 4) DFS simples mas coletando arestas de árvore
+//     cout << "Ordem de DFS a partir de '" << id_no << "': ";
+//     dfs_arvore_aux(indice_inicio, visitado, mapa_id_para_indice, tree_edges);
+//     for (int i = 0; i < n; ++i) {
+//         if (!visitado[i]) {
+//             dfs_arvore_aux(i, visitado, mapa_id_para_indice, tree_edges);
+//         }
+//     }
+//     cout << endl;
+
+//     // 5) Montar grafo-árvore
+//     Grafo* arvore = new Grafo();
+//     arvore->set_direcionado(get_direcionado());
+//     arvore->set_ponderado_aresta(get_ponderado_aresta());
+//     arvore->set_ponderado_vertice(get_ponderado_vertice());
+
+//     // Adicionar nós
+//     for (No* no : lista_adj) {
+//         arvore->adiciona_no(no->get_id(), no->get_peso());
+//     }
+
+
+//  // Agora adiciona só as arestas de árvore, sem buscar peso
+// for (Aresta* a : tree_edges) {
+//     char u = a->get_id_no_origem();
+//     char v = a->get_id_no_alvo();
+//     int peso = a->get_peso();
+//     arvore->adiciona_aresta(u, v, peso);
+// }
+//     return arvore;
+// }
+
+// void Grafo::dfs_arvore_aux(int indice_no,
+//                            vector<bool>& visitado,
+//                            const unordered_map<char,int>& mapa_id_para_indice,
+//                            vector<Aresta*> tree_edges
+// )
+// {
+//     visitado[indice_no] = true;
+//     char id_u = lista_adj[indice_no]->get_id();
+//     cout << id_u << " ";
+
+//     for (Aresta* aresta : lista_adj[indice_no]->get_arestas()) {
+//         char id_v = aresta->get_id_no_alvo();
+//         auto it = mapa_id_para_indice.find(id_v);
+//         if (it == mapa_id_para_indice.end()) continue;
+//         int indice_v = it->second;
+//         if (!visitado[indice_v]) {
+//             // registra aresta de árvore antes de descer
+//             // tree_edges.emplace_back(id_u, id_v);
+//             tree_edges.push_back(aresta);
+//             dfs_arvore_aux(indice_v, visitado, mapa_id_para_indice, tree_edges);
+//         }
+//     }
+// }
+
 Grafo* Grafo::arvore_caminhamento_profundidade(char id_no) {
     int n = lista_adj.size();
     if (n == 0) {
         cout << "Grafo vazio; nada a percorrer." << endl;
         return nullptr;
     }
-    // 1) Mapear ID → índice
+
+    // 1) Mapa ID→índice
     unordered_map<char,int> mapa_id_para_indice;
     mapa_id_para_indice.reserve(n);
-    for (int i = 0; i < n; ++i) {
+    for (int i = 0; i < n; ++i)
         mapa_id_para_indice[ lista_adj[i]->get_id() ] = i;
-    }
+
     auto it = mapa_id_para_indice.find(id_no);
     if (it == mapa_id_para_indice.end()) {
         cout << "Nó inicial '" << id_no << "' não encontrado." << endl;
@@ -215,56 +456,57 @@ Grafo* Grafo::arvore_caminhamento_profundidade(char id_no) {
     }
     int indice_inicio = it->second;
 
-    // 2) Vetor de marcados
+    // 2) Vetor de visitados e coletor de ponteiros de arestas
     vector<bool> visitado(n, false);
+    vector<Aresta*> tree_edges;
+    tree_edges.reserve(n - 1);
 
-    // 3) Coletor de tree-edges
-    vector<pair<char,char>> tree_edges;
-
-    // 4) DFS simples mas coletando arestas de árvore
+    // 3) DFS recursivo que coleta as arestas de árvore
     cout << "Ordem de DFS a partir de '" << id_no << "': ";
-    dfs_arvore_aux(indice_inicio, visitado, mapa_id_para_indice, tree_edges);
+    dfs_arvore_aux(indice_inicio,
+                      visitado,
+                      mapa_id_para_indice,
+                      tree_edges);
+    // Se houver componentes desconexas, cobre-as também
     for (int i = 0; i < n; ++i) {
         if (!visitado[i]) {
-            dfs_arvore_aux(i, visitado, mapa_id_para_indice, tree_edges);
+            dfs_arvore_aux(i,
+                              visitado,
+                              mapa_id_para_indice,
+                              tree_edges);
         }
     }
     cout << endl;
 
-    // 5) Montar grafo-árvore
+    // DEBUG: veja quantas arestas foram coletadas
+     cout << "DEBUG: Coletadas " << tree_edges.size() << " arestas de árvore.\n";
+
+    // 4) Montar o grafo-árvore a partir dessas arestas
     Grafo* arvore = new Grafo();
     arvore->set_direcionado(get_direcionado());
     arvore->set_ponderado_aresta(get_ponderado_aresta());
     arvore->set_ponderado_vertice(get_ponderado_vertice());
 
-    // Adicionar nós
-    for (No* no : lista_adj) {
+    // Copiar os nós
+    for (No* no : lista_adj)
         arvore->adiciona_no(no->get_id(), no->get_peso());
-    }
 
-
-    for (auto &par : tree_edges) {
-    char u = par.first;
-    char v = par.second;
-    int peso = 0;
-    // busca peso original no grafo fonte
-    int idx_u = mapa_id_para_indice[u];  // use o mesmo mapa de antes
-    for (Aresta* a : lista_adj[idx_u]->get_arestas()) {
-        if (a->get_id_no_alvo() == v) {
-            peso = a->get_peso();
-            break;
-        }
+    // Adicionar cada aresta de árvore, com peso
+    for (Aresta* a : tree_edges) {
+        char u = a->get_id_no_origem();
+        char v = a->get_id_no_alvo();
+        int peso = a->get_peso();
+        arvore->adiciona_aresta(u, v, peso);
     }
-    arvore->adiciona_aresta(u, v, peso);
-}
 
     return arvore;
 }
 
+// Auxiliar privado
 void Grafo::dfs_arvore_aux(int indice_no,
-                           vector<bool>& visitado,
-                           const unordered_map<char,int>& mapa_id_para_indice,
-                           vector<pair<char,char>>& tree_edges)
+                              vector<bool>& visitado,
+                              const unordered_map<char,int>& mapa_id_para_indice,
+                              vector<Aresta*> &tree_edges)
 {
     visitado[indice_no] = true;
     char id_u = lista_adj[indice_no]->get_id();
@@ -276,13 +518,15 @@ void Grafo::dfs_arvore_aux(int indice_no,
         if (it == mapa_id_para_indice.end()) continue;
         int indice_v = it->second;
         if (!visitado[indice_v]) {
-            // registra aresta de árvore antes de descer
-            tree_edges.emplace_back(id_u, id_v);
-            dfs_arvore_aux(indice_v, visitado, mapa_id_para_indice, tree_edges);
+            // guarda o ponteiro da aresta original
+            tree_edges.push_back(aresta);
+            dfs_arvore_aux(indice_v,
+                              visitado,
+                              mapa_id_para_indice,
+                              tree_edges);
         }
     }
 }
-
 
 
 

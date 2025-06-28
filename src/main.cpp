@@ -41,7 +41,7 @@ int main(int argc, char *argv[])
     }
     else
     {
-        std::cerr << "Erro ao ler a primeira linha.\n";
+        cerr << "Erro ao ler a primeira linha.\n";
         return 1;
     }
 
@@ -76,7 +76,7 @@ int main(int argc, char *argv[])
         }
         else
         {
-            std::cerr << "Erro ao ler a linha " << i + 3 << ".\n";
+            cerr << "Erro ao ler a linha " << i + 3 << ".\n";
             return 1;
         }
     }
