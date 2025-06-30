@@ -81,16 +81,13 @@ void Grafo::imprime_vector(vector<char> v)
     }
     else
     {
-        cout << "[ ";
-        for (size_t i = 0; i < v.size(); ++i)
-        {
-            cout << "'" << v[i];
-            if (v.size() > 0 && i != v.size() - 1)
-            {
-                cout << "' ,";
-            }
+        for (size_t i = 0; i < v.size(); ++i) {
+        cout << v[i];
+        if (i + 1 < v.size()) {
+            cout << ",";
         }
-        cout << "' ]" << endl;
+    }
+    cout << endl;
     }
 }
 
