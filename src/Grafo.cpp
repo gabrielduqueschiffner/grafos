@@ -261,184 +261,116 @@ Grafo *Grafo::arvore_geradora_minima_prim(vector<char> ids_nos)
     return nullptr;
 }
 
-// ==== Disjoint Set Union (Union–Find) ====
-class UnionFind
-{
-    vector<int> pai, rank;
-
-public:
-    UnionFind(int n) : pai(n), rank(n, 0)
-    {
-        for (int i = 0; i < n; ++i)
-            pai[i] = i;
-    }
-    int find(int x)
-    {
-        if (pai[x] != x)
-            pai[x] = find(pai[x]);
-        return pai[x];
-    }
-    bool unite(int a, int b)
-    {
-        a = find(a);
-        b = find(b);
-        if (a == b)
-            return false;
-        if (rank[a] < rank[b])
-            swap(a, b);
-        pai[b] = a;
-        if (rank[a] == rank[b])
-            rank[a]++;
-        return true;
-    }
-};
-
-// Grafo* Grafo::arvore_geradora_minima_kruskal(vector<char> ids_nos) {
-//     int m = ids_nos.size();
-//     if (m == 0) return nullptr;
-
-//     // 1) Monta mapa ID -> índice [0..m-1] e cria grafo vazio
-//     unordered_map<char,int> mapa_id_para_indice;
-//     mapa_id_para_indice.reserve(m);
-//     Grafo* grafo_kruskal = new Grafo();
-//     grafo_kruskal->set_direcionado(false);  // MST sempre não-direcionado
-//     grafo_kruskal->set_ponderado_aresta(get_ponderado_aresta());
-//     grafo_kruskal->set_ponderado_vertice(get_ponderado_vertice());
-
-//     for (int i = 0; i < m; ++i) {
-//         mapa_id_para_indice[ ids_nos[i] ] = i;
-//         // copia nós com peso, se houver
-//         No* no_orig = encontra_no_por_id(ids_nos[i]);
-//         int peso_no = no_orig ? no_orig->get_peso() : 0;
-//         grafo_kruskal->adiciona_no(ids_nos[i], peso_no);
-//     }
-
-//     // 2) Coletar arestas internas (sem duplicatas)
-//     struct E { char u,v; int peso; };
-//     vector<E> all_edges;
-//     all_edges.reserve(100);
-//     for (No* no : lista_adj) {
-//         char u = no->get_id();
-//         auto it_u = mapa_id_para_indice.find(u);
-//         if (it_u == mapa_id_para_indice.end()) continue;
-//         for (Aresta* a : no->get_arestas()) {
-//             char v = a->get_id_no_alvo();
-//             auto it_v = mapa_id_para_indice.find(v);
-//             if (it_v == mapa_id_para_indice.end()) continue;
-//             // para não-direcionado, só pegar (u<v)
-//             if (u < v) {
-//                 all_edges.push_back({u, v, a->get_peso()});
-//             }
-//         }
-//     }
-
-//     // 3) Ordenar arestas por peso (se não ponderado, mantém ordem inserida)
-//     if (get_ponderado_aresta()) {
-//         sort(all_edges.begin(), all_edges.end(),
-//                   [](const E& a, const E& b){ return a.peso < b.peso; });
-//     }
-
-//     // 4) Kruskal com DSU
-//     UnionFind uf(m);
-//     for (auto &e : all_edges) {
-//         int iu = mapa_id_para_indice[e.u];
-//         int iv = mapa_id_para_indice[e.v];
-//         if (uf.unite(iu, iv)) {
-//             // aresta aceita na árvore
-//             grafo_kruskal->adiciona_aresta(e.u, e.v, e.peso);
-
-//         }
-//     }
-
-//     return grafo_kruskal;
-// }
-
-Grafo *Grafo::arvore_geradora_minima_kruskal(const std::vector<char> ids_nos)
+Grafo *Grafo::arvore_geradora_minima_kruskal(vector<char> ids_nos)
 {
     int m = ids_nos.size();
     if (m == 0)
-        return nullptr;
-
-    // 1) Mapa ID → índice (0..m-1) e criação do grafo vazio
-    std::unordered_map<char, int> mapa_id_para_indice;
-    mapa_id_para_indice.reserve(m);
-    Grafo *grafo_kruskal = new Grafo();
-    grafo_kruskal->set_direcionado(false);
-    grafo_kruskal->set_ponderado_aresta(get_ponderado_aresta());
-    grafo_kruskal->set_ponderado_vertice(get_ponderado_vertice());
-    for (int i = 0; i < m; ++i)
     {
-        mapa_id_para_indice[ids_nos[i]] = i;
-        No *original = encontra_no_por_id(ids_nos[i]);
-        int peso_no = original ? original->get_peso() : 0;
-        grafo_kruskal->adiciona_no(ids_nos[i], peso_no);
+        cout << "Conjunto de nós vazio. Nada a fazer.\n";
+        return nullptr;
     }
 
-    // 2) Coleta de ponteiros para Aresta existentes, sem duplicatas
-    std::vector<Aresta *> todas_arestas;
-    todas_arestas.reserve(100);
+    // 1) Verifica se todos os IDs existem no grafo original
+    unordered_map<char, int> mapa_id_para_indice;
+    mapa_id_para_indice.reserve(m);
+    for (int i = 0; i < m; ++i)
+    {
+        char id = ids_nos[i];
+        // busca linear em lista_adj
+        bool achou = false;
+        for (No *no : lista_adj)
+        {
+            if (no->get_id() == id)
+            {
+                achou = true;
+                break;
+            }
+        }
+        if (!achou)
+        {
+            cout << "Vértice '" << id << "' não existe no grafo original.\n";
+            return nullptr;
+        }
+        // mapeia para índice local [0..m-1]
+        mapa_id_para_indice[id] = i;
+    }
+
+    // 2) Cria o grafo-árvore de saída e copia os nós
+    Grafo *grafo_kruskal = new Grafo();
+    grafo_kruskal->set_direcionado(false); // MST sempre não-direcionado
+    grafo_kruskal->set_ponderado_aresta(get_ponderado_aresta());
+    grafo_kruskal->set_ponderado_vertice(get_ponderado_vertice());
+    for (char id : ids_nos)
+    {
+        No *orig = encontra_no_por_id(id);
+        int peso_no = orig ? orig->get_peso() : 0;
+        grafo_kruskal->adiciona_no(id, peso_no);
+    }
+
+    // 3) Coleta arestas internas sem duplicata (u<v)
+    vector<Aresta *> all_edges;
     for (No *no : lista_adj)
     {
         char u = no->get_id();
-        if (!mapa_id_para_indice.count(u))
+        auto it_u = mapa_id_para_indice.find(u);
+        if (it_u == mapa_id_para_indice.end())
             continue;
         for (Aresta *a : no->get_arestas())
         {
             char v = a->get_id_no_alvo();
             if (!mapa_id_para_indice.count(v))
                 continue;
-            // Em grafo não-direcionado, pega cada par só uma vez: u<v
+            // apenas uma direção para não-direcionado: exige u<v
             if (u < v)
             {
-                todas_arestas.push_back(a);
+                all_edges.push_back(a);
             }
         }
     }
 
-    // 3) Ordena por peso (se ponderado)
+    // 4) Ordena por peso
     if (get_ponderado_aresta())
     {
-        std::sort(todas_arestas.begin(), todas_arestas.end(),
-                  [](Aresta *a, Aresta *b)
-                  {
-                      return a->get_peso() < b->get_peso();
-                  });
+        sort(all_edges.begin(), all_edges.end(),
+             [](Aresta *a, Aresta *b)
+             {
+                 return a->get_peso() < b->get_peso();
+             });
     }
 
-    // 4) Union–Find inline
-    std::vector<int> pai(m), altura(m, 0);
+    // 5) Union–Find
+    vector<int> pai(m), rank(m, 0);
     for (int i = 0; i < m; ++i)
         pai[i] = i;
-    std::function<int(int)> encontrar = [&](int x)
+    function<int(int)> find = [&](int x)
     {
-        return pai[x] == x ? x : pai[x] = encontrar(pai[x]);
+        return pai[x] == x ? x : pai[x] = find(pai[x]);
     };
-    auto unir = [&](int x, int y)
+    auto unite = [&](int x, int y)
     {
-        x = encontrar(x);
-        y = encontrar(y);
+        x = find(x);
+        y = find(y);
         if (x == y)
             return false;
-        if (altura[x] < altura[y])
-            std::swap(x, y);
+        if (rank[x] < rank[y])
+            swap(x, y);
         pai[y] = x;
-        if (altura[x] == altura[y])
-            altura[x]++;
+        if (rank[x] == rank[y])
+            ++rank[x];
         return true;
     };
 
-    // 5) Kruskal: percorre Aresta*, checa componentes e adiciona ao grafo-árvore
-    for (Aresta *a : todas_arestas)
+    // 6) Kruskal: adicionar só arestas que unem componentes diferentes
+    for (Aresta *a : all_edges)
     {
         char u = a->get_id_no_origem();
         char v = a->get_id_no_alvo();
-        int peso = a->get_peso();
-        int iu = mapa_id_para_indice[u],
-            iv = mapa_id_para_indice[v];
-        if (unir(iu, iv))
+        int pu = mapa_id_para_indice[u];
+        int pv = mapa_id_para_indice[v];
+        if (unite(pu, pv))
         {
-            grafo_kruskal->adiciona_aresta(u, v, peso);
-            grafo_kruskal->adiciona_aresta(v, u, peso);
+            // insere no MST
+            grafo_kruskal->adiciona_aresta(u, v, a->get_peso());
         }
     }
 
