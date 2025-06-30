@@ -21,11 +21,13 @@ void Gerenciador::comandos(Grafo* grafo) {
 
             char id_no = get_id_entrada();
             vector<char> fecho_transitivo_direto = grafo->fecho_transitivo_direto(id_no);
+          //  grafo->imprime_vector(fecho_transitivo_direto);
             cout<<endl<<endl;
            
 
             if(pergunta_imprimir_arquivo("fecho_trans_dir.txt")) {
-                cout<<"Metodo de impressao em arquivo nao implementado"<<endl<<endl;
+                grafo->exportar_vector_para_arquivo(fecho_transitivo_direto, "fecho_trans_dir.txt");
+                cout<<endl<<endl;
             }
 
 
@@ -55,7 +57,7 @@ void Gerenciador::comandos(Grafo* grafo) {
             cout<<endl<<endl;
 
             if(pergunta_imprimir_arquivo("caminho_minimo_dijkstra.txt")) {
-                grafo->exportar_grafo_para_arquivo(grafo, "caminho_minimo_dijkstra.txt");
+                grafo->exportar_vector_para_arquivo(caminho_minimo_dijkstra, "caminho_minimo_dijkstra.txt");
                 cout<<endl;
             }
 

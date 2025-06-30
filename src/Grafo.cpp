@@ -81,13 +81,15 @@ void Grafo::imprime_vector(vector<char> v)
     }
     else
     {
-        for (size_t i = 0; i < v.size(); ++i) {
-        cout << v[i];
-        if (i + 1 < v.size()) {
-            cout << ",";
+        for (size_t i = 0; i < v.size(); ++i)
+        {
+            cout << v[i];
+            if (i + 1 < v.size())
+            {
+                cout << ",";
+            }
         }
-    }
-    cout << endl;
+        cout << endl;
     }
 }
 
@@ -496,7 +498,64 @@ void Grafo::dfs_arvore_aux(int indice_no,
     }
 }
 
+void Grafo::exportar_vector_para_arquivo(const vector<char> &v, const string &nome_arquivo)
+{
+    ofstream arquivo(nome_arquivo);
+    if (!arquivo.is_open())
+    {
+        cerr << "Erro ao abrir o arquivo para escrita: " << nome_arquivo << endl;
+        return;
+    }
+
+    // Escreve o vetor no formato: id1,id2,id3,...
+    for (size_t i = 0; i < v.size(); ++i)
+    {
+        arquivo << v[i];
+        if (i + 1 < v.size())
+        {
+            arquivo << ",";
+        }
+    }
+    arquivo << endl;
+
+    arquivo.close();
+    cout << "Vetor exportado em " << nome_arquivo << endl;
+}
+
+// exporta o grafo para arquivo no formato: id(peso): -> id_alvo(peso)
 void Grafo::exportar_grafo_para_arquivo(Grafo *g, const string &nome_arquivo)
+{
+    ofstream arquivo(nome_arquivo);
+    if (!arquivo.is_open())
+    {
+        cerr << "Erro ao abrir o arquivo para escrita: " << nome_arquivo << endl;
+        return;
+    }
+
+    // Para cada nó do grafo
+    for (No *no : g->get_lista_adj())
+    {
+        char id_u = no->get_id();
+        int peso_u = no->get_peso();
+        arquivo << id_u << "(" << peso_u << "):";
+
+        // percorre as arestas de saída
+        for (Aresta *a : no->get_arestas())
+        {
+            char id_v = a->get_id_no_alvo();
+            int peso_av = a->get_peso();
+            arquivo << " -> "
+                    << id_v << "(" << peso_av << ")";
+        }
+        arquivo << endl; // nova linha após cada nó
+    }
+
+    arquivo.close();
+    cout << "Grafo exportado em " << nome_arquivo << endl;
+}
+
+// exporta o grafo para arquivo no formado do csacademy
+void Grafo::exportar_grafo_para_arquivo_csacademy(Grafo *g, const string &nome_arquivo)
 {
     ofstream arquivo(nome_arquivo);
     if (!arquivo.is_open())
@@ -557,6 +616,16 @@ void Grafo::exportar_grafo_para_arquivo(Grafo *g, const string &nome_arquivo)
     cout << "Grafo exportado em " << nome_arquivo << endl;
 }
 
+// Busca linear por ID
+ No * Grafo::encontra_no_por_id(char id) const {
+
+     for (No *no : lista_adj)
+        {
+            if (no->get_id() == id)
+                return no;
+        }
+        return nullptr;
+ }
 int Grafo::raio()
 {
     cout << "Metodo nao implementado" << endl;
