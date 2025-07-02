@@ -1,4 +1,5 @@
 #include "Grafo.h"
+#include "types.h"
 
 Grafo::Grafo()
 {
@@ -47,7 +48,7 @@ vector<No *> Grafo::get_lista_adj()
     return lista_adj;
 }
 
-void Grafo::adiciona_no(char id_no, int peso)
+void Grafo::adiciona_no(NoId id_no, int peso)
 {
     No *no = new No();
     no->set_id(id_no);
@@ -73,7 +74,7 @@ void Grafo::imprime_grafo() // imprime grafo no formato: id(peso): -> id_alvo(pe
     }
 }
 
-void Grafo::imprime_vector(vector<char> v)
+void Grafo::imprime_vector(vector<NoId> v)
 {
     if (v.size() == 0)
     {
@@ -93,11 +94,11 @@ void Grafo::imprime_vector(vector<char> v)
     }
 }
 
-vector<char> Grafo::fecho_transitivo_direto(char id_no)
+vector<NoId> Grafo::fecho_transitivo_direto(NoId id_no)
 {
     // Método para calcular o fecho transitivo direto de um nó em um grafo
     int n = lista_adj.size();
-    vector<char> resultado;
+    vector<NoId> resultado;
     if (n == 0)
         return resultado;
 
@@ -105,7 +106,7 @@ vector<char> Grafo::fecho_transitivo_direto(char id_no)
     {
 
         // 1. Mapear ID -> índice
-        unordered_map<char, int> mapa_id_para_indice;
+        unordered_map<NoId, int> mapa_id_para_indice;
         mapa_id_para_indice.reserve(n);
         for (int i = 0; i < n; ++i)
         {
@@ -120,7 +121,7 @@ vector<char> Grafo::fecho_transitivo_direto(char id_no)
         int indice_inicio = it->second;
 
         // 2. Vetor de marcados (visitados) inicializado com 0
-        vector<char> marcado(n, 0);
+        vector<NoId> marcado(n, 0);
         // Marca o inicial para não reapontar a si mesmo
         marcado[indice_inicio] = 1;
 
@@ -140,14 +141,14 @@ vector<char> Grafo::fecho_transitivo_direto(char id_no)
 }
 
 void Grafo::dfs_fecho_transitivo_direto(int indice_no,
-                                        vector<char> &marcado,
-                                        vector<char> &resultado,
-                                        const unordered_map<char, int> &mapa_id_para_indice)
+                                        vector<NoId> &marcado,
+                                        vector<NoId> &resultado,
+                                        const unordered_map<NoId, int> &mapa_id_para_indice)
 {
     // Para cada aresta de saída de lista_adjacencia_[indice_no]
     for (Aresta *aresta : lista_adj[indice_no]->get_arestas())
     {
-        char id_vizinho = aresta->get_id_no_alvo();
+        NoId id_vizinho = aresta->get_id_no_alvo();
         auto it = mapa_id_para_indice.find(id_vizinho);
         if (it == mapa_id_para_indice.end())
             continue;
@@ -161,13 +162,13 @@ void Grafo::dfs_fecho_transitivo_direto(int indice_no,
     }
 }
 
-vector<char> Grafo::fecho_transitivo_indireto(char id_no)
+vector<NoId> Grafo::fecho_transitivo_indireto(NoId id_no)
 {
     cout << "Metodo nao implementado" << endl;
     return {};
 }
 
-vector<char> Grafo::caminho_minimo_dijkstra(char id_no_a, char id_no_b)
+vector<NoId> Grafo::caminho_minimo_dijkstra(NoId id_no_a, NoId id_no_b)
 {
     int n = lista_adj.size();
     if (n == 0)
@@ -176,7 +177,7 @@ vector<char> Grafo::caminho_minimo_dijkstra(char id_no_a, char id_no_b)
         return {};
     }
     // 1) Mapear ID → índice
-    unordered_map<char, int> mapa_id_para_indice;
+    unordered_map<NoId, int> mapa_id_para_indice;
     mapa_id_para_indice.reserve(n);
     for (int i = 0; i < n; ++i)
         mapa_id_para_indice[lista_adj[i]->get_id()] = i;
@@ -219,7 +220,7 @@ vector<char> Grafo::caminho_minimo_dijkstra(char id_no_a, char id_no_b)
         // relaxa todas as arestas de u
         for (Aresta *a : lista_adj[u]->get_arestas())
         {
-            char id_v = a->get_id_no_alvo();
+            NoId id_v = a->get_id_no_alvo();
             int v = mapa_id_para_indice[id_v];
             int peso = get_ponderado_aresta() ? a->get_peso() : 1;
             if (dist[u] + peso < dist[v])
@@ -232,7 +233,7 @@ vector<char> Grafo::caminho_minimo_dijkstra(char id_no_a, char id_no_b)
     }
 
     // 4) Reconstruir caminho
-    vector<char> caminho;
+    vector<NoId> caminho;
     if (dist[dst] == INF)
     {
         // não existe caminho de A para B
@@ -248,19 +249,19 @@ vector<char> Grafo::caminho_minimo_dijkstra(char id_no_a, char id_no_b)
     return caminho;
 }
 
-vector<char> Grafo::caminho_minimo_floyd(char id_no, char id_no_b)
+vector<NoId> Grafo::caminho_minimo_floyd(NoId id_no, NoId id_no_b)
 {
     cout << "Metodo nao implementado" << endl;
     return {};
 }
 
-Grafo *Grafo::arvore_geradora_minima_prim(vector<char> ids_nos)
+Grafo *Grafo::arvore_geradora_minima_prim(vector<NoId> ids_nos)
 {
     cout << "Metodo nao implementado" << endl;
     return nullptr;
 }
 
-Grafo *Grafo::arvore_geradora_minima_kruskal(vector<char> ids_nos)
+Grafo *Grafo::arvore_geradora_minima_kruskal(vector<NoId> ids_nos)
 {
     int m = ids_nos.size();
     if (m == 0)
@@ -270,11 +271,11 @@ Grafo *Grafo::arvore_geradora_minima_kruskal(vector<char> ids_nos)
     }
 
     // 1) Verifica se todos os IDs existem no grafo original
-    unordered_map<char, int> mapa_id_para_indice;
+    unordered_map<NoId, int> mapa_id_para_indice;
     mapa_id_para_indice.reserve(m);
     for (int i = 0; i < m; ++i)
     {
-        char id = ids_nos[i];
+        NoId id = ids_nos[i];
         // busca linear em lista_adj
         bool achou = false;
         for (No *no : lista_adj)
@@ -299,7 +300,7 @@ Grafo *Grafo::arvore_geradora_minima_kruskal(vector<char> ids_nos)
     grafo_kruskal->set_direcionado(false); // MST sempre não-direcionado
     grafo_kruskal->set_ponderado_aresta(get_ponderado_aresta());
     grafo_kruskal->set_ponderado_vertice(get_ponderado_vertice());
-    for (char id : ids_nos)
+    for (NoId id : ids_nos)
     {
         No *orig = encontra_no_por_id(id);
         int peso_no = orig ? orig->get_peso() : 0;
@@ -310,13 +311,13 @@ Grafo *Grafo::arvore_geradora_minima_kruskal(vector<char> ids_nos)
     vector<Aresta *> all_edges;
     for (No *no : lista_adj)
     {
-        char u = no->get_id();
+        NoId u = no->get_id();
         auto it_u = mapa_id_para_indice.find(u);
         if (it_u == mapa_id_para_indice.end())
             continue;
         for (Aresta *a : no->get_arestas())
         {
-            char v = a->get_id_no_alvo();
+            NoId v = a->get_id_no_alvo();
             if (!mapa_id_para_indice.count(v))
                 continue;
             // apenas uma direção para não-direcionado: exige u<v
@@ -362,8 +363,8 @@ Grafo *Grafo::arvore_geradora_minima_kruskal(vector<char> ids_nos)
     // 6) Kruskal: adicionar só arestas que unem componentes diferentes
     for (Aresta *a : all_edges)
     {
-        char u = a->get_id_no_origem();
-        char v = a->get_id_no_alvo();
+        NoId u = a->get_id_no_origem();
+        NoId v = a->get_id_no_alvo();
         int pu = mapa_id_para_indice[u];
         int pv = mapa_id_para_indice[v];
         if (unite(pu, pv))
@@ -376,7 +377,7 @@ Grafo *Grafo::arvore_geradora_minima_kruskal(vector<char> ids_nos)
     return grafo_kruskal;
 }
 
-void Grafo::adiciona_aresta(char id_origem, char id_alvo, int peso = 0)
+void Grafo::adiciona_aresta(NoId id_origem, NoId id_alvo, int peso = 0)
 {
     No *no_origem = encontra_no_por_id(id_origem);
     if (!no_origem)
@@ -397,7 +398,7 @@ void Grafo::adiciona_aresta(char id_origem, char id_alvo, int peso = 0)
     }
 }
 
-Grafo *Grafo::arvore_caminhamento_profundidade(char id_no)
+Grafo *Grafo::arvore_caminhamento_profundidade(NoId id_no)
 {
     int n = lista_adj.size();
     if (n == 0)
@@ -407,7 +408,7 @@ Grafo *Grafo::arvore_caminhamento_profundidade(char id_no)
     }
 
     // 1) Mapa ID→índice
-    unordered_map<char, int> mapa_id_para_indice;
+    unordered_map<NoId, int> mapa_id_para_indice;
     mapa_id_para_indice.reserve(n);
     for (int i = 0; i < n; ++i)
         mapa_id_para_indice[lista_adj[i]->get_id()] = i;
@@ -460,8 +461,8 @@ Grafo *Grafo::arvore_caminhamento_profundidade(char id_no)
     // Adicionar cada aresta de árvore, com peso
     for (Aresta *a : tree_edges)
     {
-        char u = a->get_id_no_origem();
-        char v = a->get_id_no_alvo();
+        NoId u = a->get_id_no_origem();
+        NoId v = a->get_id_no_alvo();
         int peso = a->get_peso();
         arvore->adiciona_aresta(u, v, peso);
     }
@@ -472,16 +473,16 @@ Grafo *Grafo::arvore_caminhamento_profundidade(char id_no)
 // Auxiliar privado
 void Grafo::dfs_arvore_aux(int indice_no,
                            vector<bool> &visitado,
-                           const unordered_map<char, int> &mapa_id_para_indice,
+                           const unordered_map<NoId, int> &mapa_id_para_indice,
                            vector<Aresta *> &tree_edges)
 {
     visitado[indice_no] = true;
-    char id_u = lista_adj[indice_no]->get_id();
+    NoId id_u = lista_adj[indice_no]->get_id();
     cout << id_u << " ";
 
     for (Aresta *aresta : lista_adj[indice_no]->get_arestas())
     {
-        char id_v = aresta->get_id_no_alvo();
+        NoId id_v = aresta->get_id_no_alvo();
         auto it = mapa_id_para_indice.find(id_v);
         if (it == mapa_id_para_indice.end())
             continue;
@@ -498,7 +499,7 @@ void Grafo::dfs_arvore_aux(int indice_no,
     }
 }
 
-void Grafo::exportar_vector_para_arquivo(const vector<char> &v, const string &nome_arquivo)
+void Grafo::exportar_vector_para_arquivo(const vector<NoId> &v, const string &nome_arquivo)
 {
     ofstream arquivo(nome_arquivo);
     if (!arquivo.is_open())
@@ -535,14 +536,14 @@ void Grafo::exportar_grafo_para_arquivo(Grafo *g, const string &nome_arquivo)
     // Para cada nó do grafo
     for (No *no : g->get_lista_adj())
     {
-        char id_u = no->get_id();
+        NoId id_u = no->get_id();
         int peso_u = no->get_peso();
         arquivo << id_u << "(" << peso_u << "):";
 
         // percorre as arestas de saída
         for (Aresta *a : no->get_arestas())
         {
-            char id_v = a->get_id_no_alvo();
+            NoId id_v = a->get_id_no_alvo();
             int peso_av = a->get_peso();
             arquivo << " -> "
                     << id_v << "(" << peso_av << ")";
@@ -588,10 +589,10 @@ void Grafo::exportar_grafo_para_arquivo_csacademy(Grafo *g, const string &nome_a
     // Arestas são escritas como id_u id_v [peso] (se ponderado)
     for (No *no : g->get_lista_adj())
     {
-        char id_u = no->get_id();
+        NoId id_u = no->get_id();
         for (Aresta *a : no->get_arestas())
         {
-            char id_v = a->get_id_no_alvo();
+            NoId id_v = a->get_id_no_alvo();
 
             // Em não direcionado, só escreve se id_u < id_v para não duplicar:
             bool escreve = true; // Se direcionado, escreve sempre
@@ -611,13 +612,13 @@ void Grafo::exportar_grafo_para_arquivo_csacademy(Grafo *g, const string &nome_a
         }
     }
 
-    // 5. Fechar o arquivo
+    // 5. FeNoId o arquivo
     arquivo.close();
     cout << "Grafo exportado em " << nome_arquivo << endl;
 }
 
 // Busca linear por ID
- No * Grafo::encontra_no_por_id(char id) const {
+ No * Grafo::encontra_no_por_id(NoId id) const {
 
      for (No *no : lista_adj)
         {
@@ -638,19 +639,19 @@ int Grafo::diametro()
     return 0;
 }
 
-vector<char> Grafo::centro()
+vector<NoId> Grafo::centro()
 {
     cout << "Metodo nao implementado" << endl;
     return {};
 }
 
-vector<char> Grafo::periferia()
+vector<NoId> Grafo::periferia()
 {
     cout << "Metodo nao implementado" << endl;
     return {};
 }
 
-vector<char> Grafo::vertices_de_articulacao()
+vector<NoId> Grafo::vertices_de_articulacao()
 {
     cout << "Metodo nao implementado" << endl;
     return {};

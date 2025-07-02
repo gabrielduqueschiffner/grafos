@@ -1,6 +1,8 @@
 #ifndef ARESTA_H
 #define ARESTA_H
 
+#include "types.h"
+
 using namespace std;
 class Aresta {
 public:
@@ -8,15 +10,15 @@ public:
     ~Aresta();
 
     //getters e setters
-    void set_id_no_alvo(char id);
-    void set_id_no_origem(char id);
+    void set_id_no_alvo(NoId id);
+    void set_id_no_origem(NoId id);
     void set_peso(int peso);
 
-    char get_id_no_alvo();
-    char get_id_no_origem();
+    NoId get_id_no_alvo();
+    NoId get_id_no_origem();
     int get_peso();
 
-    char id_no_alvo, id_no_origem;  //aresta de entrada e saida
+    NoId id_no_alvo, id_no_origem;  //aresta de entrada e saida
     int peso;
     
 };

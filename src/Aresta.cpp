@@ -1,4 +1,5 @@
 #include "Aresta.h"
+#include "types.h"
 
 Aresta::Aresta() {
     id_no_alvo = '\0'; // Inicializa o id do nó alvo como nulo
@@ -10,19 +11,19 @@ Aresta::~Aresta() {
     // A memória será liberada quando o objeto Aresta for destruído
 }
 
-void Aresta::set_id_no_alvo(char id) {
+void Aresta::set_id_no_alvo(NoId id) {
     id_no_alvo = id;
 }
-void Aresta::set_id_no_origem(char id) {
+void Aresta::set_id_no_origem(NoId id) {
     id_no_origem = id;
 }
 void Aresta::set_peso(int peso) {
     this->peso = peso;
 }
-char Aresta::get_id_no_alvo() {
+NoId Aresta::get_id_no_alvo() {
     return id_no_alvo;
 }
-char Aresta::get_id_no_origem() {
+NoId Aresta::get_id_no_origem() {
     return id_no_origem;
 }
 int Aresta::get_peso() {

@@ -1,7 +1,8 @@
-#include <iostream>
-#include <fstream>
-#include <sstream>
 #include "Gerenciador.h"
+#include "types.h"
+#include <fstream>
+#include <iostream>
+#include <sstream>
 #include <string>
 
 using namespace std;
@@ -67,7 +68,7 @@ int main(int argc, char *argv[])
         if (getline(arquivoEntrada, linha))
         {
             istringstream iss(linha);
-            char id_no;
+            NoId id_no;
             int peso = 0;
 
             iss >> id_no >> peso; // Lê o id do nó e o peso, se houver
@@ -85,7 +86,7 @@ int main(int argc, char *argv[])
     while (getline(arquivoEntrada, linha))
     {
         istringstream iss(linha);
-        char id_no_origem, id_no_alvo;
+        NoId id_no_origem, id_no_alvo;
         int peso = 0;
         iss >> id_no_origem >> id_no_alvo; // Lê os ids dos nós origem e alvo
         if (ponderado_aresta)

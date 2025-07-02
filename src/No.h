@@ -5,6 +5,7 @@
 #include <vector>
 #include "Aresta.h"
 
+#include "types.h"
 
 using namespace std;
 class No {

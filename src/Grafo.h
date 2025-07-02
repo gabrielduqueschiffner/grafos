@@ -6,14 +6,15 @@
 #define GRAFO_H
 
 #include "No.h"
-#include <iostream>
-#include <vector>
-#include <unordered_map>
+#include "types.h"
 #include <algorithm>
 #include <fstream>
-#include <sstream>
-#include <queue>
+#include <iostream>
 #include <limits>
+#include <queue>
+#include <sstream>
+#include <unordered_map>
+#include <vector>
 
 using namespace std;
 
@@ -46,34 +47,34 @@ public:
     int get_ordem();
     vector<No *> get_lista_adj();
 
-    No *encontra_no_por_id(char id) const; // Busca linear por ID
+    No *encontra_no_por_id(NoId id) const; // Busca linear por ID
     
 
-    void adiciona_no(char id_no, int peso = 0);
-    void adiciona_aresta(char id_no_origem, char id_no_alvo, int peso);
+    void adiciona_no(NoId id_no, int peso = 0);
+    void adiciona_aresta(NoId id_no_origem, NoId id_no_alvo, int peso);
 
     // Funções de impressão no console
     void imprime_grafo();
-    void imprime_vector(vector<char> v);
+    void imprime_vector(vector<NoId> v);
 
     // Funções de exportação para arquivo
     void exportar_grafo_para_arquivo(Grafo *g, const string &nome_arquivo);
     void exportar_grafo_para_arquivo_csacademy(Grafo *g, const string &nome_arquivo);
-    void exportar_vector_para_arquivo(const vector<char> &v, const string &nome_arquivo);
+    void exportar_vector_para_arquivo(const vector<NoId> &v, const string &nome_arquivo);
 
     // Funções principais do trabalho
-    vector<char> fecho_transitivo_direto(char id_no);                 // a
-    vector<char> fecho_transitivo_indireto(char id_no);               // b
-    vector<char> caminho_minimo_dijkstra(char id_no_a, char id_no_b); // c
-    vector<char> caminho_minimo_floyd(char id_no, char id_no_b);      // d
-    Grafo *arvore_geradora_minima_prim(vector<char> ids_nos);         // e
-    Grafo *arvore_geradora_minima_kruskal(vector<char> ids_nos);      // f
-    Grafo *arvore_caminhamento_profundidade(char id_no);              // g
+    vector<NoId> fecho_transitivo_direto(NoId id_no);                 // a
+    vector<NoId> fecho_transitivo_indireto(NoId id_no);               // b
+    vector<NoId> caminho_minimo_dijkstra(NoId id_no_a, NoId id_no_b); // c
+    vector<NoId> caminho_minimo_floyd(NoId id_no, NoId id_no_b);      // d
+    Grafo *arvore_geradora_minima_prim(vector<NoId> ids_nos);         // e
+    Grafo *arvore_geradora_minima_kruskal(vector<NoId> ids_nos);      // f
+    Grafo *arvore_caminhamento_profundidade(NoId id_no);              // g
     int raio();                                                       // h 1
     int diametro();                                                   // h 2
-    vector<char> centro();                                            // h 3
-    vector<char> periferia();                                         // h 4
-    vector<char> vertices_de_articulacao();                           // i
+    vector<NoId> centro();                                            // h 3
+    vector<NoId> periferia();                                         // h 4
+    vector<NoId> vertices_de_articulacao();                           // i
 
     
 
@@ -87,12 +88,12 @@ private:
     // Auxiliares
     void dfs_arvore_aux(int indice_no,
                         vector<bool> &visitado,
-                        const unordered_map<char, int> &mapa_id_para_indice, vector<Aresta *> &tree_edges);
+                        const unordered_map<NoId, int> &mapa_id_para_indice, vector<Aresta *> &tree_edges);
 
     void dfs_fecho_transitivo_direto(int indice_no,
-                                     vector<char> &marcado,
-                                     vector<char> &resultado,
-                                     const unordered_map<char, int> &mapa_id_para_indice);
+                                     vector<NoId> &marcado,
+                                     vector<NoId> &resultado,
+                                     const unordered_map<NoId, int> &mapa_id_para_indice);
 };
 
 #endif // GRAFO_H

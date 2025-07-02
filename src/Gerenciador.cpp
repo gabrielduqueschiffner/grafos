@@ -1,6 +1,5 @@
 #include "Gerenciador.h"
-#include <fstream>
-
+#include "types.h"
 
 void Gerenciador::comandos(Grafo* grafo) {
     cout<<"Digite uma das opcoes abaixo e pressione enter:"<<endl<<endl;
@@ -19,8 +18,8 @@ void Gerenciador::comandos(Grafo* grafo) {
     switch (resp) {
         case 'a': {
 
-            char id_no = get_id_entrada();
-            vector<char> fecho_transitivo_direto = grafo->fecho_transitivo_direto(id_no);
+            NoId id_no = get_id_entrada();
+            vector<NoId> fecho_transitivo_direto = grafo->fecho_transitivo_direto(id_no);
           //  grafo->imprime_vector(fecho_transitivo_direto);
             cout<<endl<<endl;
            
@@ -36,8 +35,8 @@ void Gerenciador::comandos(Grafo* grafo) {
 
         case 'b':{
 
-            char id_no = get_id_entrada();
-            vector<char> fecho_transitivo_indireto = grafo->fecho_transitivo_indireto(id_no);
+            NoId id_no = get_id_entrada();
+            vector<NoId> fecho_transitivo_indireto = grafo->fecho_transitivo_indireto(id_no);
             cout<<"Metodo de impressao em tela nao implementado"<<endl<<endl;
 
             if(pergunta_imprimir_arquivo("fecho_trans_indir.txt")) {
@@ -50,9 +49,9 @@ void Gerenciador::comandos(Grafo* grafo) {
 
         case 'c': {
 
-            char id_no_1 = get_id_entrada();
-            char id_no_2 = get_id_entrada();
-            vector<char> caminho_minimo_dijkstra = grafo->caminho_minimo_dijkstra(id_no_1,id_no_2);
+            NoId id_no_1 = get_id_entrada();
+            NoId id_no_2 = get_id_entrada();
+            vector<NoId> caminho_minimo_dijkstra = grafo->caminho_minimo_dijkstra(id_no_1,id_no_2);
             grafo->imprime_vector(caminho_minimo_dijkstra);
             cout<<endl<<endl;
 
@@ -67,9 +66,9 @@ void Gerenciador::comandos(Grafo* grafo) {
 
         case 'd': {
 
-            char id_no_1 = get_id_entrada();
-            char id_no_2 = get_id_entrada();
-            vector<char> caminho_minimo_floyd = grafo->caminho_minimo_floyd(id_no_1,id_no_2);
+            NoId id_no_1 = get_id_entrada();
+            NoId id_no_2 = get_id_entrada();
+            vector<NoId> caminho_minimo_floyd = grafo->caminho_minimo_floyd(id_no_1,id_no_2);
             cout<<"Metodo de impressao em tela nao implementado"<<endl<<endl;
 
             if(pergunta_imprimir_arquivo("caminho_minimo_floyd.txt")) {
@@ -87,7 +86,7 @@ void Gerenciador::comandos(Grafo* grafo) {
 
             if(tam > 0 && tam <= grafo->get_ordem()) {
 
-                vector<char> ids = get_conjunto_ids(grafo,tam);
+                vector<NoId> ids = get_conjunto_ids(grafo,tam);
                 Grafo* arvore_geradora_minima_prim = grafo->arvore_geradora_minima_prim(ids);
                 cout<<"Metodo de impressao em tela nao implementado"<<endl<<endl;
 
@@ -112,7 +111,7 @@ void Gerenciador::comandos(Grafo* grafo) {
 
             if(tam > 0 && tam <= grafo->get_ordem()) {
 
-                vector<char> ids = get_conjunto_ids(grafo,tam);
+                vector<NoId> ids = get_conjunto_ids(grafo,tam);
                 Grafo* arvore_geradora_minima_kruskal = grafo->arvore_geradora_minima_kruskal(ids);
                 arvore_geradora_minima_kruskal->imprime_grafo();
                 cout<<endl<<endl;
@@ -133,7 +132,7 @@ void Gerenciador::comandos(Grafo* grafo) {
 
         case 'g': {
 
-            char id_no = get_id_entrada();
+            NoId id_no = get_id_entrada();
             Grafo* arvore_caminhamento_profundidade = grafo->arvore_caminhamento_profundidade(id_no);
             arvore_caminhamento_profundidade->imprime_grafo();
             cout<<endl<<endl;
@@ -146,7 +145,7 @@ void Gerenciador::comandos(Grafo* grafo) {
         }
 
         case 'h': {
-            vector<char> articulacao = grafo->vertices_de_articulacao();
+            vector<NoId> articulacao = grafo->vertices_de_articulacao();
             cout<<"Metodo de impressao em tela nao implementado"<<endl<<endl;
 
             if(pergunta_imprimir_arquivo("arvore_caminhamento_profundidade.txt")) {
@@ -157,7 +156,7 @@ void Gerenciador::comandos(Grafo* grafo) {
         }
         case 'i': {
 
-            vector<char> articulacao = grafo->vertices_de_articulacao();
+            vector<NoId> articulacao = grafo->vertices_de_articulacao();
             cout<<"Metodo de impressao em tela nao implementado"<<endl<<endl;
 
             if(pergunta_imprimir_arquivo("arvore_caminhamento_profundidade.txt")) {
@@ -179,18 +178,18 @@ void Gerenciador::comandos(Grafo* grafo) {
 
 }
 
-char Gerenciador::get_id_entrada() {
+NoId Gerenciador::get_id_entrada() {
     cout<<"Digite o id de um no: ";
-    char id;
+    NoId id;
     cin>>id;
     cout<<endl;
     return id;
 }
 
-vector<char> Gerenciador::get_conjunto_ids(Grafo *grafo, int tam) {
-    vector<char> ids = {};
+vector<NoId> Gerenciador::get_conjunto_ids(Grafo *grafo, int tam) {
+    vector<NoId> ids = {};
     while((int)ids.size() < tam) {
-        char id_no =get_id_entrada();
+        NoId id_no =get_id_entrada();
         bool existe = false;
         for(No* no: grafo->get_lista_adj()) {
             if(no->id == id_no){
