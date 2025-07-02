@@ -21,11 +21,13 @@ void Gerenciador::comandos(Grafo* grafo) {
 
             char id_no = get_id_entrada();
             vector<char> fecho_transitivo_direto = grafo->fecho_transitivo_direto(id_no);
+          //  grafo->imprime_vector(fecho_transitivo_direto);
             cout<<endl<<endl;
            
 
             if(pergunta_imprimir_arquivo("fecho_trans_dir.txt")) {
-                cout<<"Metodo de impressao em arquivo nao implementado"<<endl<<endl;
+                grafo->exportar_vector_para_arquivo(fecho_transitivo_direto, "fecho_trans_dir.txt");
+                cout<<endl<<endl;
             }
 
 
@@ -51,10 +53,12 @@ void Gerenciador::comandos(Grafo* grafo) {
             char id_no_1 = get_id_entrada();
             char id_no_2 = get_id_entrada();
             vector<char> caminho_minimo_dijkstra = grafo->caminho_minimo_dijkstra(id_no_1,id_no_2);
-            cout<<"Metodo de impressao em tela nao implementado"<<endl<<endl;
+            grafo->imprime_vector(caminho_minimo_dijkstra);
+            cout<<endl<<endl;
 
             if(pergunta_imprimir_arquivo("caminho_minimo_dijkstra.txt")) {
-                cout<<"Metodo de impressao em arquivo nao implementado"<<endl;
+                grafo->exportar_vector_para_arquivo(caminho_minimo_dijkstra, "caminho_minimo_dijkstra.txt");
+                cout<<endl;
             }
 
 
@@ -110,10 +114,12 @@ void Gerenciador::comandos(Grafo* grafo) {
 
                 vector<char> ids = get_conjunto_ids(grafo,tam);
                 Grafo* arvore_geradora_minima_kruskal = grafo->arvore_geradora_minima_kruskal(ids);
-                cout<<"Metodo de impressao em tela nao implementado"<<endl<<endl;
+                arvore_geradora_minima_kruskal->imprime_grafo();
+                cout<<endl<<endl;
 
                 if(pergunta_imprimir_arquivo("agm_kruskal.txt")) {
-                    cout<<"Metodo de impressao em arquivo nao implementado"<<endl;
+                   arvore_geradora_minima_kruskal->exportar_grafo_para_arquivo(arvore_geradora_minima_kruskal, "agm_kruskal.txt");
+                   
                 }
 
                 delete arvore_geradora_minima_kruskal;
@@ -129,10 +135,10 @@ void Gerenciador::comandos(Grafo* grafo) {
 
             char id_no = get_id_entrada();
             Grafo* arvore_caminhamento_profundidade = grafo->arvore_caminhamento_profundidade(id_no);
-           
+            arvore_caminhamento_profundidade->imprime_grafo();
             cout<<endl<<endl;
             if(pergunta_imprimir_arquivo("arvore_caminhamento_profundidade.txt")) {
-               grafo->exportar_grafo_para_arquivo(arvore_caminhamento_profundidade, "arvore_caminhamento_profundidade.txt");
+              grafo->exportar_grafo_para_arquivo(arvore_caminhamento_profundidade, "arvore_caminhamento_profundidade.txt");
             }
 
             delete arvore_caminhamento_profundidade;

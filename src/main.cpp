@@ -41,7 +41,7 @@ int main(int argc, char *argv[])
     }
     else
     {
-        std::cerr << "Erro ao ler a primeira linha.\n";
+        cerr << "Erro ao ler a primeira linha.\n";
         return 1;
     }
 
@@ -76,7 +76,7 @@ int main(int argc, char *argv[])
         }
         else
         {
-            std::cerr << "Erro ao ler a linha " << i + 3 << ".\n";
+            cerr << "Erro ao ler a linha " << i + 3 << ".\n";
             return 1;
         }
     }
@@ -121,7 +121,7 @@ int main(int argc, char *argv[])
     // passar a impressão do grafo para o gerenciador depois
 
     grafo->imprime_grafo();
-   grafo->exportar_grafo_para_arquivo(grafo, "teste1.txt");
+
     // teste, apagar depois
     cout << "Direcionado: " << (grafo->get_direcionado() ? "sim" : "nao") << endl;
     cout << "Ponderado Aresta: " << (grafo->get_ponderado_aresta() ? "sim" : "nao") << endl;
