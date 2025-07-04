@@ -96,7 +96,7 @@ private:
     // Auxiliares
     void dfs_arvore_aux(int indice_no,
                         vector<bool> &visitado,
-                        const unordered_map<NoId, int> &mapa_id_para_indice, vector<Aresta *> &tree_edges);
+                        const unordered_map<NoId, int> &mapa_id_para_indice, vector<Aresta *> &arestas_arvore);
 
     void dfs_fecho_transitivo_direto(int indice_no,
                                      vector<bool> &marcado,
