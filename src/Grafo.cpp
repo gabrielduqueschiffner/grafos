@@ -183,86 +183,87 @@ vector<NoId> Grafo::fecho_transitivo_indireto(NoId id_no)
 // =======================================
 
 //Gabriel
-vector<NoId> Grafo::caminho_minimo_dijkstra(NoId id_no_a, NoId id_no_b)
+vector<NoId> Grafo::caminho_minimo_dijkstra(NoId id_origem, NoId id_destino)
 {
-    int n = lista_adj.size();
-    if (n == 0)
+    int numero_vertices = lista_adj.size();
+    if (numero_vertices == 0)
     {
         cout << "Grafo vazio!!!" << endl;
         return {};
     }
-    // 1) Mapear ID → índice
-    unordered_map<NoId, int> mapa_id_para_indice;
-    mapa_id_para_indice.reserve(n);
-    for (int i = 0; i < n; ++i)
-        mapa_id_para_indice[lista_adj[i]->get_id()] = i;
 
-    // verifica nós válidos (se existem no grafo)
-    if (!mapa_id_para_indice.count(id_no_a))
+    // 1) Mapa de ID → índice
+    auto mapa_id_para_indice = get_mapa_id_index();
+
+    // Verifica existência dos vértices
+    if (!mapa_id_para_indice.count(id_origem))
     {
-        cout << "Vértice de origem '" << id_no_a << "' não existe no grafo.\n";
+        cout << "Vértice de origem '" << id_origem << "' não existe no grafo.\n";
         return {};
     }
-    if (!mapa_id_para_indice.count(id_no_b))
+    if (!mapa_id_para_indice.count(id_destino))
     {
-        cout << "Vértice de destino '" << id_no_b << "' não existe no grafo.\n";
+        cout << "Vértice de destino '" << id_destino << "' não existe no grafo.\n";
         return {};
     }
 
-    int src = mapa_id_para_indice[id_no_a];
-    int dst = mapa_id_para_indice[id_no_b];
+    int indice_origem  = mapa_id_para_indice[id_origem];
+    int indice_destino = mapa_id_para_indice[id_destino];
 
-    // 2) Distâncias e predecessores
-    const int INF = numeric_limits<int>::max();
-    vector<int> dist(n, INF);
-    vector<int> prev(n, -1);
-    dist[src] = 0;
+    // 2) Inicializa distâncias e antecessores
+    const int INFINITO = numeric_limits<int>::max();
+    vector<int> distancia(numero_vertices, INFINITO);
+    vector<int> antecessor(numero_vertices, -1);
+    distancia[indice_origem] = 0;
 
-    // 3) Min-heap de (dist, índice)
-    using pii = pair<int, int>;
-    priority_queue<pii, vector<pii>, greater<pii>> pq;
-    pq.emplace(0, src);
+    // 3) Fila de prioridade de pares (distância_atual, índice_do_vertice)
+    using Par = pair<int,int>;
+    priority_queue<Par, vector<Par>, greater<Par>> fila_prioridade;
+    fila_prioridade.emplace(0, indice_origem);
 
-    while (!pq.empty())
+    while (!fila_prioridade.empty())
     {
-        auto [d, u] = pq.top();
-        pq.pop();
-        if (d > dist[u])
+        auto [dist_atual, vertice_atual] = fila_prioridade.top();
+        fila_prioridade.pop();
+
+        if (dist_atual > distancia[vertice_atual]) 
             continue;
-        if (u == dst)
-            break; // já achou distância mínima até dst
+        if (vertice_atual == indice_destino) 
+            break;
 
-        // relaxa todas as arestas de u
-        for (Aresta *a : lista_adj[u]->get_arestas())
+        // Relaxa cada aresta de saída
+        for (Aresta* aresta : lista_adj[vertice_atual]->get_arestas())
         {
-            NoId id_v = a->get_id_no_alvo();
-            int v = mapa_id_para_indice[id_v];
-            int peso = get_ponderado_aresta() ? a->get_peso() : 1;
-            if (dist[u] + peso < dist[v])
+            NoId id_vizinho = aresta->get_id_no_alvo();
+            int indice_vizinho = mapa_id_para_indice[id_vizinho];
+            int peso_aresta = get_ponderado_aresta() ? aresta->get_peso() : 1;
+
+            int nova_dist = distancia[vertice_atual] + peso_aresta;
+            if (nova_dist < distancia[indice_vizinho])
             {
-                dist[v] = dist[u] + peso;
-                prev[v] = u;
-                pq.emplace(dist[v], v);
+                distancia[indice_vizinho] = nova_dist;
+                antecessor[indice_vizinho] = vertice_atual;
+                fila_prioridade.emplace(nova_dist, indice_vizinho);
             }
         }
     }
 
-    // 4) Reconstruir caminho
+    // 4) Reconstrói o caminho de destino a origem
+    if (distancia[indice_destino] == INFINITO)
+    {
+        cout << "Não existe caminho de '" << id_origem
+             << "' até '" << id_destino << "'\n";
+        return {};
+    }
+
     vector<NoId> caminho;
-    if (dist[dst] == INF)
-    {
-        // não existe caminho de A para B
-        cout << "Não existe caminho de '" << id_no_a
-             << "' até '" << id_no_b << endl;
-        return {}; // não alcançável
-    }
-    for (int at = dst; at != -1; at = prev[at])
-    {
-        caminho.push_back(lista_adj[at]->get_id());
-    }
+    for (int atual = indice_destino; atual != -1; atual = antecessor[atual])
+        caminho.push_back(lista_adj[atual]->get_id());
     reverse(caminho.begin(), caminho.end());
+
     return caminho;
 }
+
 
 // =======================================
 
@@ -567,7 +568,7 @@ void Grafo::exportar_vector_para_arquivo(const vector<NoId> &v, const string &no
     cout << "Vetor exportado em " << nome_arquivo << endl;
 }
 
-// exporta o grafo para arquivo no formato: id(peso): -> id_alvo(peso)
+// exporta o grafo para arquivo no formato: id(peso vertice): -> id_alvo(peso aresta)
 void Grafo::exportar_grafo_para_arquivo(Grafo *g, const string &nome_arquivo)
 {
     ofstream arquivo(nome_arquivo);
