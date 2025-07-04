@@ -17,13 +17,6 @@
 
 using namespace std;
 
-// Supondo enum para cores:
-enum Cor
-{
-    BRANCO = 0,
-    CINZA = 1,
-    PRETO = 2
-};
 
 class Grafo
 {

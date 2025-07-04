@@ -34,7 +34,7 @@ int main(int argc, char *argv[])
     if (getline(arquivoEntrada, linha))
     {
         istringstream iss(linha);
-        iss >> direcionado >> ponderado_vertice >> ponderado_aresta;
+        iss >> direcionado >> ponderado_aresta >> ponderado_vertice;
         grafo->set_direcionado(direcionado);
         grafo->set_ponderado_vertice(ponderado_vertice);
         grafo->set_ponderado_aresta(ponderado_aresta);
