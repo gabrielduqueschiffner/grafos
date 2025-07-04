@@ -303,9 +303,15 @@ Grafo *Grafo::arvore_geradora_minima_kruskal(vector<NoId> ids_nos)
     int m = ids_nos.size();
     if (m == 0)
     {
-        cout << "Conjunto de nós vazio. Nada a fazer.\n";
+        cout << "Conjunto de nós vazio!!!" << endl;
         return nullptr;
     }
+
+    // if(get_direcionado()){
+    //     cout << "Grafo direcionado. Kruskal não implementado." << endl;
+    //     return nullptr;
+    // }
+
 
     // 1) Verifica se todos os IDs existem no grafo original
     unordered_map<NoId, int> mapa_id_para_indice;
@@ -334,7 +340,7 @@ Grafo *Grafo::arvore_geradora_minima_kruskal(vector<NoId> ids_nos)
 
     // 2) Cria o grafo-árvore de saída e copia os nós
     Grafo *grafo_kruskal = new Grafo();
-    grafo_kruskal->set_direcionado(false); // MST sempre não-direcionado
+    grafo_kruskal->set_direcionado(false); // MST/AGM sempre não-direcionado
     grafo_kruskal->set_ponderado_aresta(get_ponderado_aresta());
     grafo_kruskal->set_ponderado_vertice(get_ponderado_vertice());
     for (NoId id : ids_nos)
@@ -406,7 +412,7 @@ Grafo *Grafo::arvore_geradora_minima_kruskal(vector<NoId> ids_nos)
         int pv = mapa_id_para_indice[v];
         if (unite(pu, pv))
         {
-            // insere no MST
+            // insere no MST/AGM
             grafo_kruskal->adiciona_aresta(u, v, a->get_peso());
         }
     }
@@ -469,21 +475,12 @@ Grafo *Grafo::arvore_caminhamento_profundidade(NoId id_no)
                    visitado,
                    mapa_id_para_indice,
                    tree_edges);
-    // Se houver componentes desconexas, cobre-as também
-    for (int i = 0; i < n; ++i)
-    {
-        if (!visitado[i])
-        {
-            dfs_arvore_aux(i,
-                           visitado,
-                           mapa_id_para_indice,
-                           tree_edges);
-        }
-    }
+                   
+
     cout << endl;
 
     // DEBUG: veja quantas arestas foram coletadas
-    cout << "DEBUG: Coletadas " << tree_edges.size() << " arestas de árvore.\n";
+  //  cout << "DEBUG: Coletadas " << tree_edges.size() << " arestas de árvore.\n";
 
     // 4) Montar o grafo-árvore a partir dessas arestas
     Grafo *arvore = new Grafo();
