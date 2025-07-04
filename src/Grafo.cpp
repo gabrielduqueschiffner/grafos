@@ -106,73 +106,69 @@ void Grafo::imprime_resumo_grafo() {
     cout << "- Ordem: " << get_ordem() << endl;
 }
 
+// =======================================
+// A) FECHO TRANSITIVO DIRETO
+// =======================================
+
+//Gabriel
 vector<NoId> Grafo::fecho_transitivo_direto(NoId id_no)
 {
-    // Método para calcular o fecho transitivo direto de um nó em um grafo
     int n = lista_adj.size();
     vector<NoId> resultado;
-    if (n == 0)
-        return resultado;
-
-    if (get_direcionado())
-    {
-
-        // 1. Mapear ID -> índice
-        unordered_map<NoId, int> mapa_id_para_indice;
-        mapa_id_para_indice.reserve(n);
-        for (int i = 0; i < n; ++i)
-        {
-            mapa_id_para_indice[lista_adj[i]->get_id()] = i;
-        }
-        auto it = mapa_id_para_indice.find(id_no);
-        if (it == mapa_id_para_indice.end())
-        {
-            // vértice não existe
-            return resultado;
-        }
-        int indice_inicio = it->second;
-
-        // 2. Vetor de marcados (visitados) inicializado com 0
-        vector<NoId> marcado(n, 0);
-        // Marca o inicial para não reapontar a si mesmo
-        marcado[indice_inicio] = 1;
-
-        // 3. Chama DFS recursivo para ver todos alcançáveis
-        dfs_fecho_transitivo_direto(indice_inicio, marcado, resultado, mapa_id_para_indice);
-
-        // 4. Retorna vetor de IDs alcançados (ordem de descoberta)
-        cout << "Fecho transitivo a partir de '" << id_no << "': ";
-        imprime_vector(resultado);
+    if (n == 0) {
+        cout << "Lista de adjacência vazia. Não há fecho transitivo direto." <<endl;
         return resultado;
     }
-    else
-    {
+
+    if (!get_direcionado()) {
         cout << "Grafo não direcionado. Fecho transitivo direto não implementado." << endl;
-        return {};
+        return resultado;
     }
+
+    // 1) Mapeamento Id → índice
+
+    auto mapa_id_index = get_mapa_id_index(); // cria um mapa de NoId para índice
+    auto it = mapa_id_index.find(id_no); // busca pelo ID do nó inicial
+    if (it == mapa_id_index.end()) {
+        cout << "Vértice '" << id_no << "' não existe no grafo." <<endl; 
+        return resultado;
+    }
+    int idx_inicio = it->second; 
+
+    // 2) Vetor de marcados e chama a busca em profundidade auxiliar
+    vector<bool> marcado(n, false);
+    marcado[idx_inicio] = true;  // marca o nó inicial como visitado
+    dfs_fecho_transitivo_direto(idx_inicio, marcado, resultado, mapa_id_index);
+
+    // 3) Imprime e retorna
+    cout << "Fecho transitivo a partir de '" << id_no << "': ";
+    imprime_vector(resultado);
+    return resultado;
 }
 
-void Grafo::dfs_fecho_transitivo_direto(int indice_no,
-                                        vector<NoId> &marcado,
+//Gabriel
+// Função auxiliar de busca em profundidade que coleta o fecho transitivo direto
+void Grafo::dfs_fecho_transitivo_direto(int idx,
+                                        vector<bool> &marcado,
                                         vector<NoId> &resultado,
-                                        const unordered_map<NoId, int> &mapa_id_para_indice)
+                                        const unordered_map<NoId,int> &mapa_id_index)
 {
-    // Para cada aresta de saída de lista_adjacencia_[indice_no]
-    for (Aresta *aresta : lista_adj[indice_no]->get_arestas())
+    for (Aresta *a : lista_adj[idx]->get_arestas()) // percorre as arestas do nó atual
     {
-        NoId id_vizinho = aresta->get_id_no_alvo();
-        auto it = mapa_id_para_indice.find(id_vizinho);
-        if (it == mapa_id_para_indice.end())
-            continue;
-        int indice_vizinho = it->second;
-        if (!marcado[indice_vizinho])
+        NoId v_id = a->get_id_no_alvo(); //
+        auto it = mapa_id_index.find(v_id); // busca o ID do nó alvo no mapa
+        if (it == mapa_id_index.end()) continue;
+        int idx_v = it->second;
+        if (!marcado[idx_v]) // se o nó alvo ainda não foi visitado
         {
-            marcado[indice_vizinho] = 1;
-            resultado.push_back(id_vizinho);
-            dfs_fecho_transitivo_direto(indice_vizinho, marcado, resultado, mapa_id_para_indice);
+            marcado[idx_v] = true; // marca como visitado
+            resultado.push_back(v_id); // adiciona ao resultado
+            dfs_fecho_transitivo_direto(idx_v, marcado, resultado, mapa_id_index); 
         }
     }
 }
+
+// =======================================
 
 // Gustavo
 vector<NoId> Grafo::fecho_transitivo_indireto(NoId id_no)

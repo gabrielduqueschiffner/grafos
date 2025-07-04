@@ -1,6 +1,7 @@
 #include <iostream>
 #include <stdexcept>
 #include <string>
+#include "Gerenciador.h"
 #include "LeitorGrafo.h"
 #include "types.h"
 
@@ -16,13 +17,13 @@ int main(int argc, char *argv[])
     cout << endl;
     grafo->imprime_grafo();
 
-    //Gerenciador::comandos(grafo);
+    Gerenciador::comandos(grafo);
     
     // TESTES
 
-    vector<NoId> caminho = grafo->caminho_minimo_floyd('a', 'c');
-    for (NoId id : caminho)
-        cout << id << endl;
+    // vector<NoId> caminho = grafo->caminho_minimo_floyd('a', 'c');
+    // for (NoId id : caminho)
+    //     cout << id << endl;
 
     return 0;
 }

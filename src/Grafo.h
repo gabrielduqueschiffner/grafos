@@ -74,8 +74,8 @@ public:
     /// DEBUG
     void imprimeMatriz(vector<vector<int>> mat) {
 
-        for (int i = 0; i < mat.size(); ++i) {
-            for (int j = 0; j < mat[i].size(); ++j) {
+        for (int i = 0; i < static_cast<int>(mat.size()); ++i) {
+            for (int j = 0; j < static_cast<int>(mat[i].size()); ++j) {
 
                 if (mat[i][j] == numeric_limits<int>::max())
                     cout << setw(3) << left << "-";
@@ -99,7 +99,7 @@ private:
                         const unordered_map<NoId, int> &mapa_id_para_indice, vector<Aresta *> &tree_edges);
 
     void dfs_fecho_transitivo_direto(int indice_no,
-                                     vector<NoId> &marcado,
+                                     vector<bool> &marcado,
                                      vector<NoId> &resultado,
                                      const unordered_map<NoId, int> &mapa_id_para_indice);
 
