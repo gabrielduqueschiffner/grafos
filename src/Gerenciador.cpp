@@ -2,16 +2,21 @@
 #include "types.h"
 
 void Gerenciador::comandos(Grafo* grafo) {
-    cout<<"Digite uma das opcoes abaixo e pressione enter:"<<endl<<endl;
-    cout<<"(a) Fecho transitivo direto de um no;"<<endl;
-    cout<<"(b) Fecho transitivo indireto de um no;"<<endl;
-    cout<<"(c) Caminho minimo (Djikstra);"<<endl;
-    cout<<"(d) Caminho minimo (Floyd);"<<endl;
-    cout<<"(e) Arvore Geradora Minima (Algoritmo de Prim);"<<endl;
-    cout<<"(f) Arvore Geradora Minima (Algoritmo de Kruskal);"<<endl;
-    cout<<"(g) Arvore de caminhamento em profundidade;"<<endl;
-    cout<<"(h) Raio, diametro, centro e periferia do grafo;"<<endl;
-    cout<<"(0) Sair;"<<endl<<endl;
+
+    cout <<
+
+        "\n => Digite uma das opcoes abaixo e pressione enter:"
+        "\n (a) Fecho transitivo direto de um no"
+        "\n (b) Fecho transitivo indireto de um no"
+        "\n (c) Caminho minimo (Djikstra)"
+        "\n (d) Caminho minimo (Floyd)"
+        "\n (e) Arvore Geradora Minima (Algoritmo de Prim)"
+        "\n (f) Arvore Geradora Minima (Algoritmo de Kruskal)"
+        "\n (g) Arvore de caminhamento em profundidade"
+        "\n (h) Raio, diametro, centro e periferia do grafo"
+        "\n (0) Sair;"
+
+    << endl;
 
     char resp;
     cin >> resp;
@@ -20,7 +25,7 @@ void Gerenciador::comandos(Grafo* grafo) {
 
             NoId id_no = get_id_entrada();
             vector<NoId> fecho_transitivo_direto = grafo->fecho_transitivo_direto(id_no);
-          //  grafo->imprime_vector(fecho_transitivo_direto);
+            //  grafo->imprime_vector(fecho_transitivo_direto);
             cout<<endl<<endl;
            
 
@@ -28,7 +33,6 @@ void Gerenciador::comandos(Grafo* grafo) {
                 grafo->exportar_vector_para_arquivo(fecho_transitivo_direto, "fecho_trans_dir.txt");
                 cout<<endl<<endl;
             }
-
 
             break;
         }
@@ -43,7 +47,6 @@ void Gerenciador::comandos(Grafo* grafo) {
                 cout<<"Metodo de impressao em arquivo nao implementado"<<endl;
             }
 
-;
             break;
         }
 
@@ -202,9 +205,9 @@ vector<NoId> Gerenciador::get_conjunto_ids(Grafo *grafo, int tam) {
             cout<<"Vertice nao existe"<<endl;
         }else{
             bool repetido = find(ids.begin(), ids.end(),id_no) != ids.end();
-            if(repetido) {
+            if (repetido) {
                     cout<<"Valor repetido"<<endl;
-            }else {
+            } else {
                 ids.push_back(id_no);
             }
         }

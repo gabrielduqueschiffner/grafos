@@ -3,7 +3,6 @@
 
 #include "types.h"
 
-using namespace std;
 class Aresta {
 public:
     Aresta();

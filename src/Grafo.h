@@ -9,6 +9,7 @@
 #include "types.h"
 #include <algorithm>
 #include <fstream>
+#include <iomanip>
 #include <iostream>
 #include <limits>
 #include <queue>
@@ -56,6 +57,7 @@ public:
     // Funções de impressão no console
     void imprime_grafo();
     void imprime_vector(vector<NoId> v);
+    void imprime_resumo_grafo();
 
     // Funções de exportação para arquivo
     void exportar_grafo_para_arquivo(Grafo *g, const string &nome_arquivo);
@@ -76,7 +78,21 @@ public:
     vector<NoId> periferia();                                         // h 4
     vector<NoId> vertices_de_articulacao();                           // i
 
-    
+    /// DEBUG
+    void imprimeMatriz(vector<vector<int>> mat) {
+
+        for (int i = 0; i < mat.size(); ++i) {
+            for (int j = 0; j < mat[i].size(); ++j) {
+
+                if (mat[i][j] == numeric_limits<int>::max())
+                    cout << setw(3) << left << "-";
+                else
+                    cout << setw(3) << left << mat[i][j];
+            }
+            cout << endl;
+        }
+    }
+    /////////
 
 private:
     int ordem;
@@ -94,6 +110,13 @@ private:
                                      vector<NoId> &marcado,
                                      vector<NoId> &resultado,
                                      const unordered_map<NoId, int> &mapa_id_para_indice);
+
+    
+
+    unordered_map<int, NoId> get_mapa_index_id();
+    unordered_map<NoId, int> get_mapa_id_index();
+    void calcular_matrizes_floyd(vector<vector<int>>& dist, vector<vector<int>>& prox);
+    vector<int> get_excentricidades();
 };
 
 #endif // GRAFO_H

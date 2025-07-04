@@ -1,4 +1,8 @@
 #include "Grafo.h"
+#include <algorithm>
+#include <stdexcept>
+#include <vector>
+#include "Aresta.h"
 #include "types.h"
 
 Grafo::Grafo()
@@ -43,7 +47,7 @@ int Grafo::get_ordem()
     return ordem;
 }
 
-vector<No *> Grafo::get_lista_adj()
+vector<No*> Grafo::get_lista_adj()
 {
     return lista_adj;
 }
@@ -62,7 +66,6 @@ void Grafo::adiciona_no(NoId id_no, int peso)
 
 void Grafo::imprime_grafo() // imprime grafo no formato: id(peso): -> id_alvo(peso)
 {
-    cout << "Grafo: " << endl;
     for (No *no : lista_adj)
     {
         cout << no->get_id() << "(" << no->get_peso() << ")" << ": ";
@@ -92,6 +95,14 @@ void Grafo::imprime_vector(vector<NoId> v)
         }
         cout << endl;
     }
+}
+
+void Grafo::imprime_resumo_grafo() {
+    cout << "=> Características do grafo:" << endl;
+    cout << "- Direcionado: " << (get_direcionado() ? "sim" : "nao") << endl;
+    cout << "- Ponderado Aresta: " << (get_ponderado_aresta() ? "sim" : "nao") << endl;
+    cout << "- Ponderado Vertice: " << (get_ponderado_vertice() ? "sim" : "nao") << endl;
+    cout << "- Ordem: " << get_ordem() << endl;
 }
 
 vector<NoId> Grafo::fecho_transitivo_direto(NoId id_no)
@@ -162,11 +173,13 @@ void Grafo::dfs_fecho_transitivo_direto(int indice_no,
     }
 }
 
+// Gustavo
 vector<NoId> Grafo::fecho_transitivo_indireto(NoId id_no)
 {
     cout << "Metodo nao implementado" << endl;
     return {};
 }
+
 
 vector<NoId> Grafo::caminho_minimo_dijkstra(NoId id_no_a, NoId id_no_b)
 {
@@ -249,12 +262,146 @@ vector<NoId> Grafo::caminho_minimo_dijkstra(NoId id_no_a, NoId id_no_b)
     return caminho;
 }
 
-vector<NoId> Grafo::caminho_minimo_floyd(NoId id_no, NoId id_no_b)
+// Gustavo - aux
+unordered_map<int, NoId> Grafo::get_mapa_index_id() 
 {
-    cout << "Metodo nao implementado" << endl;
-    return {};
+    unordered_map<int, NoId> mapa_index_id;
+
+    for (int index = 0; index < ordem; index++) {
+        NoId id = lista_adj[index]->get_id();
+        mapa_index_id.insert(pair<int, NoId>(index, id));
+    }
+
+    return mapa_index_id;
 }
 
+// Gustavo - aux
+unordered_map<NoId, int> Grafo::get_mapa_id_index() 
+{
+
+    unordered_map<NoId, int> mapa_id_index;
+
+    for (int index = 0; index < ordem; index++) {
+        NoId id = lista_adj[index]->get_id();
+        mapa_id_index.insert(pair<NoId, int>(id, index));
+    }
+
+    return mapa_id_index;
+}
+
+// Gustavo - aux
+void Grafo::calcular_matrizes_floyd(vector<vector<int>>& dist, vector<vector<int>>& prox) 
+{
+    if (!in_ponderado_aresta)
+        throw new runtime_error("Grafo precisa ser ponderado nas arestas.");
+
+    // Mapeamento de dois sentidos entre NoId e índice da matriz
+
+    auto mapa_index_id = get_mapa_id_index();
+    auto mapa_id_index = get_mapa_id_index();
+
+    for (int index = 0; index < ordem; index++) {
+        NoId id = lista_adj[index]->get_id();
+        mapa_index_id.insert(pair<int, NoId>(index, id));
+        mapa_id_index.insert(pair<NoId, int>(id, index));
+    }
+
+    // INICIALIZAÇÃO
+
+    // Matriz de distância - Preencher tudo com infinito
+    int INFINITO = numeric_limits<int>::max();
+    dist.assign(ordem, vector<int>(ordem, INFINITO));
+
+    // Matriz de próximo - Preencher com -1
+    prox.assign(ordem, vector<int>(ordem, -1));
+    
+    // Preencher distância de vizinhos com o peso da aresta
+    for (int i = 0; i < ordem; i++) {
+
+        // Diagonal da matriz distância igual a 0
+        dist[i][i] = 0;
+
+        No *no_origem = lista_adj[i];
+        vector<Aresta*> arestas = no_origem->get_arestas();
+
+        for (Aresta* aresta : arestas) {
+
+            int j = mapa_id_index[aresta->id_no_alvo];
+            dist[i][j] = aresta->get_peso();
+            prox[i][j] = j;
+        }
+    }
+
+    // ATUALIZAÇÃO
+
+    // Considerar o caminho passando por intermediário k
+    for (int k = 0; k < ordem; k++) {
+
+        // Para cada par de vértices i, j
+        for (int i = 0; i < ordem; i++) {
+            for (int j = 0; j < ordem; j++) {
+
+                if (dist[i][k] != INFINITO && dist[k][j] != INFINITO) {
+
+                    int atual = dist[i][j];
+                    int alternativo = dist[i][k] + dist[k][j];
+                
+                    if (alternativo < atual) {
+
+                        dist[i][j] = alternativo;
+                        prox[i][j] = prox[i][k];
+                    }
+                }
+            }
+        }
+    }
+
+    for (int i=0; i<ordem; i++) {
+        if (dist[i][i] < 0) {
+            throw new runtime_error("Resultados inválidos para grafo com ciclo negativo");
+        }
+    }
+}
+
+// Gustavo
+vector<NoId> Grafo::caminho_minimo_floyd(NoId id_no_origem, NoId id_no_alvo)
+{
+    // TODO: Verificar por ciclos negativos?
+
+    int INFINITO = numeric_limits<int>::max();
+    
+    auto mapa_index_id = get_mapa_index_id();
+    auto mapa_id_index = get_mapa_id_index();
+    
+    vector<vector<int>> dist;
+    vector<vector<int>> prox;
+    
+    calcular_matrizes_floyd(dist, prox);
+
+    // RECUPERAR CAMINHO 
+    vector<NoId> caminho = {};
+
+    int index_no_atual = mapa_id_index[id_no_origem];
+    int index_no_alvo = mapa_id_index[id_no_alvo];
+
+    // Verificar caminho impossível
+    if (dist[index_no_atual][index_no_alvo] == INFINITO 
+        || prox[index_no_atual][index_no_alvo] == -1)
+        return {};
+
+    // Enquanto não chegar no destino, adicionar os nós do caminho no vector
+    while (index_no_atual != index_no_alvo) {
+        caminho.push_back(mapa_index_id[index_no_atual]);
+        index_no_atual = prox[index_no_atual][index_no_alvo];
+    }
+
+    // Adicionando nó alvo
+    caminho.push_back(mapa_index_id[index_no_alvo]);
+
+    return caminho;
+}
+
+// Gustavo
 Grafo *Grafo::arvore_geradora_minima_prim(vector<NoId> ids_nos)
 {
     cout << "Metodo nao implementado" << endl;
@@ -627,30 +774,81 @@ void Grafo::exportar_grafo_para_arquivo_csacademy(Grafo *g, const string &nome_a
         }
         return nullptr;
  }
+
+// h1 - Gustavo
 int Grafo::raio()
 {
-    cout << "Metodo nao implementado" << endl;
-    return 0;
+    auto excentricidades = get_excentricidades();
+
+    auto it_raio = min_element(excentricidades.begin(), excentricidades.end());
+
+    if (it_raio == excentricidades.end())
+        throw new runtime_error("Raio inexistente");
+
+    return *it_raio;
 }
 
+// h2 - Gustavo
 int Grafo::diametro()
 {
-    cout << "Metodo nao implementado" << endl;
-    return 0;
+    auto excentricidades = get_excentricidades();
+
+    auto it_diametro = max_element(excentricidades.begin(), excentricidades.end());
+
+    if (it_diametro == excentricidades.end())
+        throw new runtime_error("Raio inexistente");
+
+    return *it_diametro;
 }
 
+// h3 - Gustavo
 vector<NoId> Grafo::centro()
 {
-    cout << "Metodo nao implementado" << endl;
-    return {};
+    // nós que na matriz dist possui dist igual raio
 }
 
+// h4 - Gustavo
 vector<NoId> Grafo::periferia()
 {
-    cout << "Metodo nao implementado" << endl;
-    return {};
+    // nós que na matriz dist possui dist igual diametro
 }
 
+// h auxiliar - Gustavo
+vector<int> Grafo::get_excentricidades() 
+{
+
+    if (!in_ponderado_aresta)
+        throw new runtime_error("Grafo deve ser ponderado nas arestas");
+
+    vector<vector<int>> dist;
+    vector<vector<int>> prox;
+
+    calcular_matrizes_floyd(dist, prox);
+
+    int MENOS_INFINITO = numeric_limits<int>::min();
+
+    vector<int> excentricidades(ordem);
+
+    for (int i=0; i<ordem; i++) {
+
+        int excentricidade = MENOS_INFINITO;
+
+        for (int j=0; j<ordem; j++) {
+
+            if (i == j)
+                continue;
+
+            if (dist[i][j] > excentricidade)
+                excentricidade = dist[i][j];
+        }
+        
+        excentricidades[i] = excentricidade;
+    }
+        
+    return excentricidades;
+}
+
+// Gustavo
 vector<NoId> Grafo::vertices_de_articulacao()
 {
     cout << "Metodo nao implementado" << endl;
