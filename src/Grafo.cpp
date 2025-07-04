@@ -309,127 +309,99 @@ Grafo *Grafo::arvore_geradora_minima_prim(vector<NoId> ids_nos)
 // =======================================
 
 //Gabriel
-Grafo *Grafo::arvore_geradora_minima_kruskal(vector<NoId> ids_nos)
+
+Grafo* Grafo::arvore_geradora_minima_kruskal(vector<NoId> ids_nos)
 {
-    int m = ids_nos.size();
-    if (m == 0)
-    {
-        cout << "Conjunto de nós vazio!!!" << endl;
-        return nullptr;
+
+    Grafo* grafo_kruskal = new Grafo(); // Cria o grafo-árvore de saída
+
+    // 0) Validações iniciais
+    if (get_direcionado()) {
+        cout << "Erro: Kruskal clássico só funciona em grafos não-direcionados." << endl;
+        return grafo_kruskal;
+    }
+    if (!get_ponderado_aresta()) {
+        cout << "Erro: Kruskal clássico requer grafo ponderado nas arestas." << endl;
+        return grafo_kruskal;
     }
 
-    // if(get_direcionado()){
-    //     cout << "Grafo direcionado. Kruskal não implementado." << endl;
-    //     return nullptr;
-    // }
+    int m = ids_nos.size();
+    if (m == 0) {
+        cout << "Conjunto de nós vazio!!!" << endl;
+        return grafo_kruskal;
+    }
 
-
-    // 1) Verifica se todos os IDs existem no grafo original
-    unordered_map<NoId, int> mapa_id_para_indice;
-    mapa_id_para_indice.reserve(m);
-    for (int i = 0; i < m; ++i)
-    {
+    // 1) Cria mapeamento local ID→índice [0..m-1]
+    auto mapa_global = get_mapa_id_index();
+    unordered_map<NoId,int> mapa_local;
+    mapa_local.reserve(m);
+    for (int i = 0; i < m; ++i) {
         NoId id = ids_nos[i];
-        // busca linear em lista_adj
-        bool achou = false;
-        for (No *no : lista_adj)
-        {
-            if (no->get_id() == id)
-            {
-                achou = true;
-                break;
-            }
-        }
-        if (!achou)
-        {
-            cout << "Vértice '" << id << "' não existe no grafo original.\n";
+        if (!mapa_global.count(id)) {
+            cout << "Vértice '" << id << "' não existe no grafo original." << endl;
             return nullptr;
         }
-        // mapeia para índice local [0..m-1]
-        mapa_id_para_indice[id] = i;
+        mapa_local[id] = i;
     }
 
-    // 2) Cria o grafo-árvore de saída e copia os nós
-    Grafo *grafo_kruskal = new Grafo();
-    grafo_kruskal->set_direcionado(false); // MST/AGM sempre não-direcionado
-    grafo_kruskal->set_ponderado_aresta(get_ponderado_aresta());
+    // 2) Configura e adiciona todos os nós do grafo-árvore de saída
+    grafo_kruskal->set_direcionado(false);
+    grafo_kruskal->set_ponderado_aresta(true);
     grafo_kruskal->set_ponderado_vertice(get_ponderado_vertice());
-    for (NoId id : ids_nos)
-    {
-        No *orig = encontra_no_por_id(id);
-        int peso_no = orig ? orig->get_peso() : 0;
+    for (NoId id : ids_nos) {
+        No* no_orig = encontra_no_por_id(id);
+        int peso_no = no_orig ? no_orig->get_peso() : 0;
         grafo_kruskal->adiciona_no(id, peso_no);
     }
 
-    // 3) Coleta arestas internas sem duplicata (u<v)
-    vector<Aresta *> all_edges;
-    for (No *no : lista_adj)
-    {
+    // 3) Coleta arestas internas (u<v) do subconjunto
+    vector<Aresta*> todas_arestas;
+    for (No* no : lista_adj) {
         NoId u = no->get_id();
-        auto it_u = mapa_id_para_indice.find(u);
-        if (it_u == mapa_id_para_indice.end())
-            continue;
-        for (Aresta *a : no->get_arestas())
-        {
+        if (!mapa_local.count(u)) continue;
+        for (Aresta* a : no->get_arestas()) {
             NoId v = a->get_id_no_alvo();
-            if (!mapa_id_para_indice.count(v))
-                continue;
-            // apenas uma direção para não-direcionado: exige u<v
-            if (u < v)
-            {
-                all_edges.push_back(a);
+            if (mapa_local.count(v) && u < v) {
+                todas_arestas.push_back(a);
             }
         }
     }
 
-    // 4) Ordena por peso
-    if (get_ponderado_aresta())
-    {
-        sort(all_edges.begin(), all_edges.end(),
-             [](Aresta *a, Aresta *b)
-             {
-                 return a->get_peso() < b->get_peso();
-             });
-    }
+    // 4) Ordena por peso crescente
+    sort(todas_arestas.begin(), todas_arestas.end(),
+         [](Aresta* a, Aresta* b){
+             return a->get_peso() < b->get_peso();
+         });
 
-    // 5) Union–Find
-    vector<int> pai(m), rank(m, 0);
-    for (int i = 0; i < m; ++i)
-        pai[i] = i;
-    function<int(int)> find = [&](int x)
-    {
+    // 5) Union–Find inline
+    vector<int> pai(m), altura(m, 0);
+    iota(pai.begin(), pai.end(), 0);
+    function<int(int)> find = [&](int x) {
         return pai[x] == x ? x : pai[x] = find(pai[x]);
     };
-    auto unite = [&](int x, int y)
-    {
-        x = find(x);
-        y = find(y);
-        if (x == y)
-            return false;
-        if (rank[x] < rank[y])
-            swap(x, y);
+    auto unite = [&](int x, int y) {
+        x = find(x);  y = find(y);
+        if (x == y) return false;
+        if (altura[x] < altura[y]) swap(x, y);
         pai[y] = x;
-        if (rank[x] == rank[y])
-            ++rank[x];
+        if (altura[x] == altura[y]) ++altura[x];
         return true;
     };
 
-    // 6) Kruskal: adicionar só arestas que unem componentes diferentes
-    for (Aresta *a : all_edges)
-    {
+    // 6) Kruskal: adiciona arestas que unem componentes distintas
+    for (Aresta* a : todas_arestas) {
         NoId u = a->get_id_no_origem();
         NoId v = a->get_id_no_alvo();
-        int pu = mapa_id_para_indice[u];
-        int pv = mapa_id_para_indice[v];
-        if (unite(pu, pv))
-        {
-            // insere no MST/AGM
+        int iu = mapa_local[u], iv = mapa_local[v];
+        if (unite(iu, iv)) {
             grafo_kruskal->adiciona_aresta(u, v, a->get_peso());
         }
     }
 
     return grafo_kruskal;
 }
+
+
 
 // =======================================
 
