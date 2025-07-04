@@ -3,6 +3,7 @@
 #include <stdexcept>
 #include <vector>
 #include "Aresta.h"
+#include "No.h"
 #include "types.h"
 
 Grafo::Grafo()
@@ -289,117 +290,6 @@ unordered_map<NoId, int> Grafo::get_mapa_id_index()
     return mapa_id_index;
 }
 
-// Gustavo - aux
-void Grafo::calcular_matrizes_floyd(vector<vector<int>>& dist, vector<vector<int>>& prox) 
-{
-    if (!in_ponderado_aresta)
-        throw new runtime_error("Grafo precisa ser ponderado nas arestas.");
-
-    // Mapeamento de dois sentidos entre NoId e índice da matriz
-
-    auto mapa_index_id = get_mapa_id_index();
-    auto mapa_id_index = get_mapa_id_index();
-
-    for (int index = 0; index < ordem; index++) {
-        NoId id = lista_adj[index]->get_id();
-        mapa_index_id.insert(pair<int, NoId>(index, id));
-        mapa_id_index.insert(pair<NoId, int>(id, index));
-    }
-
-    // INICIALIZAÇÃO
-
-    // Matriz de distância - Preencher tudo com infinito
-    int INFINITO = numeric_limits<int>::max();
-    dist.assign(ordem, vector<int>(ordem, INFINITO));
-
-    // Matriz de próximo - Preencher com -1
-    prox.assign(ordem, vector<int>(ordem, -1));
-    
-    // Preencher distância de vizinhos com o peso da aresta
-    for (int i = 0; i < ordem; i++) {
-
-        // Diagonal da matriz distância igual a 0
-        dist[i][i] = 0;
-
-        No *no_origem = lista_adj[i];
-        vector<Aresta*> arestas = no_origem->get_arestas();
-
-        for (Aresta* aresta : arestas) {
-
-            int j = mapa_id_index[aresta->id_no_alvo];
-            dist[i][j] = aresta->get_peso();
-            prox[i][j] = j;
-        }
-    }
-
-    // ATUALIZAÇÃO
-
-    // Considerar o caminho passando por intermediário k
-    for (int k = 0; k < ordem; k++) {
-
-        // Para cada par de vértices i, j
-        for (int i = 0; i < ordem; i++) {
-            for (int j = 0; j < ordem; j++) {
-
-                if (dist[i][k] != INFINITO && dist[k][j] != INFINITO) {
-
-                    int atual = dist[i][j];
-                    int alternativo = dist[i][k] + dist[k][j];
-                
-                    if (alternativo < atual) {
-
-                        dist[i][j] = alternativo;
-                        prox[i][j] = prox[i][k];
-                    }
-                }
-            }
-        }
-    }
-
-    for (int i=0; i<ordem; i++) {
-        if (dist[i][i] < 0) {
-            throw new runtime_error("Resultados inválidos para grafo com ciclo negativo");
-        }
-    }
-}
-
-// Gustavo
-vector<NoId> Grafo::caminho_minimo_floyd(NoId id_no_origem, NoId id_no_alvo)
-{
-    // TODO: Verificar por ciclos negativos?
-
-    int INFINITO = numeric_limits<int>::max();
-    
-    auto mapa_index_id = get_mapa_index_id();
-    auto mapa_id_index = get_mapa_id_index();
-    
-    vector<vector<int>> dist;
-    vector<vector<int>> prox;
-    
-    calcular_matrizes_floyd(dist, prox);
-
-    // RECUPERAR CAMINHO 
-    vector<NoId> caminho = {};
-
-    int index_no_atual = mapa_id_index[id_no_origem];
-    int index_no_alvo = mapa_id_index[id_no_alvo];
-
-    // Verificar caminho impossível
-    if (dist[index_no_atual][index_no_alvo] == INFINITO 
-        || prox[index_no_atual][index_no_alvo] == -1)
-        return {};
-
-    // Enquanto não chegar no destino, adicionar os nós do caminho no vector
-    while (index_no_atual != index_no_alvo) {
-        caminho.push_back(mapa_index_id[index_no_atual]);
-        index_no_atual = prox[index_no_atual][index_no_alvo];
-    }
-
-    // Adicionando nó alvo
-    caminho.push_back(mapa_index_id[index_no_alvo]);
-
-    return caminho;
-}
 
 // Gustavo
 Grafo *Grafo::arvore_geradora_minima_prim(vector<NoId> ids_nos)
@@ -773,10 +663,131 @@ void Grafo::exportar_grafo_para_arquivo_csacademy(Grafo *g, const string &nome_a
                 return no;
         }
         return nullptr;
- }
+}
+
+// Gustavo
+vector<NoId> Grafo::vertices_de_articulacao()
+{
+    cout << "Metodo nao implementado" << endl;
+    return {};
+}
+
+// ======================== FLOYD  ========================
+
+// Gustavo - aux
+void Grafo::calcular_matrizes_floyd(vector<vector<int>>& dist, vector<vector<int>>& prox) 
+{
+    if (!in_ponderado_aresta)
+        throw new runtime_error("Grafo precisa ser ponderado nas arestas.");
+
+    // Mapeamento de dois sentidos entre NoId e índice da matriz
+
+    auto mapa_index_id = get_mapa_id_index();
+    auto mapa_id_index = get_mapa_id_index();
+
+    for (int index = 0; index < ordem; index++) {
+        NoId id = lista_adj[index]->get_id();
+        mapa_index_id.insert(pair<int, NoId>(index, id));
+        mapa_id_index.insert(pair<NoId, int>(id, index));
+    }
+
+    // INICIALIZAÇÃO
+
+    // Matriz de distância - Preencher tudo com infinito
+    int INFINITO = numeric_limits<int>::max();
+    dist.assign(ordem, vector<int>(ordem, INFINITO));
+
+    // Matriz de próximo - Preencher com -1
+    prox.assign(ordem, vector<int>(ordem, -1));
+    
+    // Preencher distância de vizinhos com o peso da aresta
+    for (int i = 0; i < ordem; i++) {
+
+        // Diagonal da matriz distância igual a 0
+        dist[i][i] = 0;
+
+        No *no_origem = lista_adj[i];
+        vector<Aresta*> arestas = no_origem->get_arestas();
+
+        for (Aresta* aresta : arestas) {
+
+            int j = mapa_id_index[aresta->id_no_alvo];
+            dist[i][j] = aresta->get_peso();
+            prox[i][j] = j;
+        }
+    }
+
+    // ATUALIZAÇÃO
+
+    // Considerar o caminho passando por intermediário k
+    for (int k = 0; k < ordem; k++) {
+
+        // Para cada par de vértices i, j
+        for (int i = 0; i < ordem; i++) {
+            for (int j = 0; j < ordem; j++) {
+
+                if (dist[i][k] != INFINITO && dist[k][j] != INFINITO) {
+
+                    int atual = dist[i][j];
+                    int alternativo = dist[i][k] + dist[k][j];
+                
+                    if (alternativo < atual) {
+
+                        dist[i][j] = alternativo;
+                        prox[i][j] = prox[i][k];
+                    }
+                }
+            }
+        }
+    }
+
+    for (int i=0; i<ordem; i++) {
+        if (dist[i][i] < 0) {
+            throw new runtime_error("Resultados inválidos para grafo com ciclo negativo");
+        }
+    }
+}
+
+// Gustavo
+vector<NoId> Grafo::caminho_minimo_floyd(NoId id_no_origem, NoId id_no_alvo)
+{
+    // TODO: Verificar por ciclos negativos?
+
+    int INFINITO = numeric_limits<int>::max();
+    
+    auto mapa_index_id = get_mapa_index_id();
+    auto mapa_id_index = get_mapa_id_index();
+    
+    vector<vector<int>> dist;
+    vector<vector<int>> prox;
+    
+    calcular_matrizes_floyd(dist, prox);
+
+    // RECUPERAR CAMINHO 
+    vector<NoId> caminho = {};
+
+    int index_no_atual = mapa_id_index[id_no_origem];
+    int index_no_alvo = mapa_id_index[id_no_alvo];
+
+    // Verificar caminho impossível
+    if (dist[index_no_atual][index_no_alvo] == INFINITO 
+        || prox[index_no_atual][index_no_alvo] == -1)
+        return {};
+
+    // Enquanto não chegar no destino, adicionar os nós do caminho no vector
+    while (index_no_atual != index_no_alvo) {
+        caminho.push_back(mapa_index_id[index_no_atual]);
+        index_no_atual = prox[index_no_atual][index_no_alvo];
+    }
+
+    // Adicionando nó alvo
+    caminho.push_back(mapa_index_id[index_no_alvo]);
+
+    return caminho;
+}
 
 // h1 - Gustavo
-int Grafo::raio()
+int Grafo::get_raio()
 {
     auto excentricidades = get_excentricidades();
 
@@ -789,7 +800,7 @@ int Grafo::raio()
 }
 
 // h2 - Gustavo
-int Grafo::diametro()
+int Grafo::get_diametro()
 {
     auto excentricidades = get_excentricidades();
 
@@ -802,21 +813,38 @@ int Grafo::diametro()
 }
 
 // h3 - Gustavo
-vector<NoId> Grafo::centro()
+vector<NoId> Grafo::get_centro()
 {
-    // nós que na matriz dist possui dist igual raio
+    auto excentricidades = get_excentricidades();
+    auto mapa_index_id = get_mapa_index_id();
+    vector<NoId> centro;
+    int raio = get_raio();
+
+    for (int i=0; i<ordem; i++)
+        if (excentricidades[i] == raio)
+            centro.push_back(mapa_index_id[i]);
+    
+    return centro;
 }
 
 // h4 - Gustavo
-vector<NoId> Grafo::periferia()
+vector<NoId> Grafo::get_periferia()
 {
-    // nós que na matriz dist possui dist igual diametro
+    auto excentricidades = get_excentricidades();
+    auto mapa_index_id = get_mapa_index_id();
+    vector<NoId> centro;
+    int diametro = get_diametro();
+
+    for (int i=0; i<ordem; i++)
+        if (excentricidades[i] == diametro)
+            centro.push_back(mapa_index_id[i]);
+    
+    return centro;
 }
 
 // h auxiliar - Gustavo
 vector<int> Grafo::get_excentricidades() 
 {
-
     if (!in_ponderado_aresta)
         throw new runtime_error("Grafo deve ser ponderado nas arestas");
 
@@ -846,11 +874,4 @@ vector<int> Grafo::get_excentricidades()
     }
         
     return excentricidades;
-}
-
-// Gustavo
-vector<NoId> Grafo::vertices_de_articulacao()
-{
-    cout << "Metodo nao implementado" << endl;
-    return {};
 }

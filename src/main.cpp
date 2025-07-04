@@ -3,7 +3,6 @@
 #include <string>
 #include "LeitorGrafo.h"
 #include "types.h"
-// #include "Gerenciador.h"
 
 using namespace std;
 int main(int argc, char *argv[])
@@ -17,12 +16,13 @@ int main(int argc, char *argv[])
     cout << endl;
     grafo->imprime_grafo();
 
-    vector<NoId> caminho = grafo->caminho_minimo_floyd('a', 'c');
+    //Gerenciador::comandos(grafo);
+    
+    // TESTES
 
+    vector<NoId> caminho = grafo->caminho_minimo_floyd('a', 'c');
     for (NoId id : caminho)
         cout << id << endl;
-
-    //Gerenciador::comandos(grafo);
 
     return 0;
 }

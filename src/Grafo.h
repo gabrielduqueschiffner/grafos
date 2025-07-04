@@ -72,10 +72,10 @@ public:
     Grafo *arvore_geradora_minima_prim(vector<NoId> ids_nos);         // e
     Grafo *arvore_geradora_minima_kruskal(vector<NoId> ids_nos);      // f
     Grafo *arvore_caminhamento_profundidade(NoId id_no);              // g
-    int raio();                                                       // h 1
-    int diametro();                                                   // h 2
-    vector<NoId> centro();                                            // h 3
-    vector<NoId> periferia();                                         // h 4
+    int get_raio();                                                   // h 1
+    int get_diametro();                                               // h 2
+    vector<NoId> get_centro();                                        // h 3
+    vector<NoId> get_periferia();                                     // h 4
     vector<NoId> vertices_de_articulacao();                           // i
 
     /// DEBUG
@@ -92,7 +92,6 @@ public:
             cout << endl;
         }
     }
-    /////////
 
 private:
     int ordem;
