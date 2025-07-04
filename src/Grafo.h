@@ -110,8 +110,6 @@ private:
                                      vector<NoId> &resultado,
                                      const unordered_map<NoId, int> &mapa_id_para_indice);
 
-    
-
     unordered_map<int, NoId> get_mapa_index_id();
     unordered_map<NoId, int> get_mapa_id_index();
     void calcular_matrizes_floyd(vector<vector<int>>& dist, vector<vector<int>>& prox);
