@@ -11,6 +11,7 @@ using namespace std;
 class No {
 public:
     No();
+    No(NoId id_no, int peso);
     ~No();
 
     void set_peso(int peso);
@@ -21,6 +22,7 @@ public:
     vector<Aresta*> get_arestas();
 
     void adiciona_aresta(char id_no_origem, char id_no_alvo, int peso = 0);
+    void adiciona_aresta(Aresta* aresta);
 
     char id;
     int peso;

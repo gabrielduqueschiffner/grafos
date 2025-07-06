@@ -20,9 +20,15 @@ int main(int argc, char *argv[])
     
     // TESTES
 
-    vector<NoId> caminho = grafo->caminho_minimo_floyd('a', 'c');
-    for (NoId id : caminho)
-        cout << id << endl;
+    for (NoId id : grafo->get_centro())
+        cout << id << " ";
+
+    cout<< endl;
+
+    for (NoId id : grafo->get_periferia())
+        cout << id << " ";
+
+    cout << endl;
 
     return 0;
 }

@@ -43,9 +43,9 @@ public:
 
     No *encontra_no_por_id(NoId id) const; // Busca linear por ID
     
-
     void adiciona_no(NoId id_no, int peso = 0);
-    void adiciona_aresta(NoId id_no_origem, NoId id_no_alvo, int peso);
+    void adiciona_no(No* no);
+    void adiciona_aresta(NoId id_no_origem, NoId id_no_alvo, int peso=0);
 
     // Funções de impressão no console
     void imprime_grafo();
@@ -107,6 +107,7 @@ private:
     unordered_map<NoId, int> get_mapa_id_index();
     void calcular_matrizes_floyd(vector<vector<int>>& dist, vector<vector<int>>& prox);
     vector<int> get_excentricidades();
+    Grafo* gera_grafo_transposto();
 };
 
 #endif // GRAFO_H

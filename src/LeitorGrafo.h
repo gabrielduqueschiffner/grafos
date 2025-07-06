@@ -41,14 +41,14 @@ public:
             istringstream iss(linha);
             iss >> ordem;
 
-            grafo->set_ordem(ordem);
+            // grafo->set_ordem(ordem); -> ordem incrementada na adição
         } else {
             throw new runtime_error("Erro ao ler a segunda linha");
         }
 
         // Gerando a lista de nós do grafo e setando os seus pesos caso seja
         // ponderado
-        for (int i = 0; i < ordem; i++) {
+        for (int i = 0; i < ordem; i++) { // ordem declarada no escopo "cobre" a da classe
             if (getline(arquivoEntrada, linha)) {
                 istringstream iss(linha);
                 NoId id_no;

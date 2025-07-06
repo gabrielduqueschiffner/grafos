@@ -14,44 +14,15 @@ Grafo::~Grafo()
 {
 }
 
-void Grafo::set_direcionado(int direcao)
-{
-    in_direcionado = direcao;
-}
-void Grafo::set_ponderado_aresta(int ponderado)
-{
-    in_ponderado_aresta = ponderado;
-}
-void Grafo::set_ponderado_vertice(int ponderado)
-{
-    in_ponderado_vertice = ponderado;
-}
-void Grafo::set_ordem(int ordem_grafo)
-{
-    ordem = ordem_grafo;
-}
-int Grafo::get_direcionado()
-{
-    return in_direcionado;
-}
-int Grafo::get_ponderado_aresta()
-{
-    return in_ponderado_aresta;
-}
-int Grafo::get_ponderado_vertice()
-{
-    return in_ponderado_vertice;
-}
-
-int Grafo::get_ordem()
-{
-    return ordem;
-}
-
-vector<No*> Grafo::get_lista_adj()
-{
-    return lista_adj;
-}
+void Grafo::set_direcionado(int direcao) {in_direcionado = direcao;}
+void Grafo::set_ponderado_aresta(int ponderado) {in_ponderado_aresta = ponderado;}
+void Grafo::set_ponderado_vertice(int ponderado) {in_ponderado_vertice = ponderado;}
+void Grafo::set_ordem(int ordem_grafo) {ordem = ordem_grafo;}
+int Grafo::get_direcionado() {return in_direcionado;}
+int Grafo::get_ponderado_aresta() {return in_ponderado_aresta;}
+int Grafo::get_ponderado_vertice() {return in_ponderado_vertice;}
+int Grafo::get_ordem() {return ordem;}
+vector<No*> Grafo::get_lista_adj() {return lista_adj;}
 
 void Grafo::adiciona_no(NoId id_no, int peso)
 {
@@ -63,6 +34,13 @@ void Grafo::adiciona_no(NoId id_no, int peso)
         no->set_peso(peso);
     }
     lista_adj.push_back(no);
+    ordem++;
+}
+
+void Grafo::adiciona_no(No* no)
+{
+    lista_adj.push_back(no);
+    ordem++;
 }
 
 void Grafo::imprime_grafo() // imprime grafo no formato: id(peso): -> id_alvo(peso)
@@ -174,13 +152,6 @@ void Grafo::dfs_fecho_transitivo_direto(int indice_no,
     }
 }
 
-// Gustavo
-vector<NoId> Grafo::fecho_transitivo_indireto(NoId id_no)
-{
-    cout << "Metodo nao implementado" << endl;
-    return {};
-}
-
 
 vector<NoId> Grafo::caminho_minimo_dijkstra(NoId id_no_a, NoId id_no_b)
 {
@@ -261,41 +232,6 @@ vector<NoId> Grafo::caminho_minimo_dijkstra(NoId id_no_a, NoId id_no_b)
     }
     reverse(caminho.begin(), caminho.end());
     return caminho;
-}
-
-// Gustavo - aux
-unordered_map<int, NoId> Grafo::get_mapa_index_id() 
-{
-    unordered_map<int, NoId> mapa_index_id;
-
-    for (int index = 0; index < ordem; index++) {
-        NoId id = lista_adj[index]->get_id();
-        mapa_index_id.insert(pair<int, NoId>(index, id));
-    }
-
-    return mapa_index_id;
-}
-
-// Gustavo - aux
-unordered_map<NoId, int> Grafo::get_mapa_id_index() 
-{
-
-    unordered_map<NoId, int> mapa_id_index;
-
-    for (int index = 0; index < ordem; index++) {
-        NoId id = lista_adj[index]->get_id();
-        mapa_id_index.insert(pair<NoId, int>(id, index));
-    }
-
-    return mapa_id_index;
-}
-
-
-// Gustavo
-Grafo *Grafo::arvore_geradora_minima_prim(vector<NoId> ids_nos)
-{
-    cout << "Metodo nao implementado" << endl;
-    return nullptr;
 }
 
 Grafo *Grafo::arvore_geradora_minima_kruskal(vector<NoId> ids_nos)
@@ -420,7 +356,7 @@ Grafo *Grafo::arvore_geradora_minima_kruskal(vector<NoId> ids_nos)
     return grafo_kruskal;
 }
 
-void Grafo::adiciona_aresta(NoId id_origem, NoId id_alvo, int peso = 0)
+void Grafo::adiciona_aresta(NoId id_origem, NoId id_alvo, int peso)
 {
     No *no_origem = encontra_no_por_id(id_origem);
     if (!no_origem)
@@ -669,13 +605,323 @@ vector<NoId> Grafo::vertices_de_articulacao()
     return {};
 }
 
-// ======================== FLOYD  ========================
+// [ ] - b - Gus - Fecho transitivo indireto (direcionado)
+// [X] - d - Gus - Caminho mínimo Floyd
+// [ ] - e - Gus - Árvore geradora mínima
+// [X] - h - Gus - Raio, diâmetro, centro, periferia
 
-// Gustavo - aux
+
+
+// -=-=-=-=-=-=-=-=-=-=-=-=-=-=- GUSTAVO -=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-
+
+// ========================= PRIM =========================
+
+// Seja (u,v) a aresta de menor peso.
+// F ¬ {(u,v)}
+// Para i = 1,...,n faça
+// Se c(i,u) < c(i,v) então prox(i) ¬ u
+// Senão prox(i) ¬ v
+// fim-para
+// prox(u), prox(v) ¬ 0, contador ¬ 0
+// Enquanto contador < n-2 faça
+// Seja j tal que prox(j)10 e c(j,prox(j)) é mínimo.
+// F ¬ F È {(j,prox(j))}
+// prox(j) ¬ 0
+// Para i = 1,...,n faça
+// Se prox(i) 1 0 e c(i,prox(i)) > c(i,j) então
+// prox(i) ¬ j
+
+// fim-para
+// contador ¬ contador + 1
+// fim-enquanto
+
+// BUG: deixei bug pra trás!? Quando adiciona a aresta, tem que adiciona nó alvo!? Onde foi?
+
+
+// Gustavo
+Grafo *Grafo::arvore_geradora_minima_prim(vector<NoId> ids_subconjunto)
+{
+    /* Obs: Grafos sem arestas ponderadas tem arestas de peso zero, funcionando 
+    adequadamente com o algoritmo, embora o resultado tenham um significado um
+    pouco diferente. */
+
+    // TODO: Verificar conectividade?
+
+    if (in_direcionado)
+        throw runtime_error("Método de Prim é inválido para ávores direcionadas");
+
+    // Verificar se o subconjunto não está vazio
+    if (ids_subconjunto.empty())
+        throw runtime_error("Subconjunto de nós não pode estar vazio");
+
+    Grafo* grafo_agm = new Grafo();
+
+    auto mapa_id_index = get_mapa_id_index();
+    auto mapa_index_id = get_mapa_index_id();
+    
+    // Se certificar que todos os IDs existem no grafo
+    for (NoId id : ids_subconjunto)
+        if (mapa_id_index.find(id) == mapa_id_index.end())
+            throw runtime_error("Nem todos os nós passados pertencem ao grafo");
+        
+    // Nós
+
+    vector<No*> nos = lista_adj;
+    vector<bool> sao_nos_incluidos(ordem, false); 
+    vector<bool> sao_nos_faltantes(ordem, false);
+    
+    // Arestas
+
+    vector<Aresta*> arestas;
+    vector<bool> sao_arestas_incluidas;
+    vector<bool> sao_arestas_possiveis;
+
+    // Inicializando auxiliares
+
+    for (NoId id_no : ids_subconjunto) {
+        sao_nos_faltantes[mapa_id_index[id_no]] = true;
+    }
+
+    for (int index_no_origem=0; index_no_origem<nos.size(); index_no_origem++) {
+        for (Aresta* aresta : nos[index_no_origem]->get_arestas()) {
+            
+            int index_no_alvo = mapa_id_index[aresta->get_id_no_alvo()];
+            
+            if (index_no_alvo >= index_no_origem)
+                arestas.push_back(aresta);
+        }
+    }
+
+    sao_arestas_incluidas.assign(arestas.size(), false);
+    sao_arestas_possiveis.assign(arestas.size(), false);
+    
+    // Funções auxiliares
+
+    function<void()> atualiza_arestas_possiveis = [&](){
+        
+        for (int i=0; i<arestas.size(); i++) {
+
+            // Não elegíveis do lado de fora podem passar a ser
+            if (!sao_arestas_possiveis[i] && !sao_arestas_incluidas[i]) {
+
+                int index_origem = mapa_id_index[arestas[i]->get_id_no_origem()]; 
+                int index_alvo = mapa_id_index[arestas[i]->get_id_no_alvo()];
+
+                // Liga nós do subconjunto, dentro com fora
+                if ((sao_nos_faltantes[index_origem] && sao_nos_incluidos[index_alvo]) 
+                    || (sao_nos_incluidos[index_origem] && sao_nos_faltantes[index_alvo])
+                ) {
+                    sao_arestas_possiveis[i] = true;
+                }
+            }
+            
+        }
+    };
+
+    function<void(int)> adiciona_no_agm = [&](int no_index){
+        
+        No* no = nos[no_index];
+
+        grafo_agm->adiciona_no(new No(no->get_id(), no->get_peso()));
+
+        sao_nos_incluidos[no_index] = true;
+        sao_nos_faltantes[no_index] = false;
+
+        atualiza_arestas_possiveis();
+    };
+
+    function<void(int)> adiciona_aresta_e_no_agm = [&](int aresta_index){
+
+        Aresta* aresta = arestas[aresta_index];
+        
+        int index_origem = mapa_id_index[aresta->get_id_no_origem()];
+        int index_alvo = mapa_id_index[aresta->get_id_no_alvo()];
+        
+        int no_a_adicionar_index = -1;
+
+        // Decidindo qual nó será adicionado
+        if (sao_nos_incluidos[index_origem] && sao_nos_faltantes[index_alvo]) {
+
+            no_a_adicionar_index = index_alvo;
+
+        } else if (sao_nos_incluidos[index_alvo] && sao_nos_faltantes[index_origem]) {
+            
+            no_a_adicionar_index = index_origem;
+        }
+
+        if (no_a_adicionar_index == -1)
+            throw runtime_error("Aresta não conecta nós válidos da AGM");
+
+        // Adicionar o nó à AGM
+        adiciona_no_agm(no_a_adicionar_index);
+        
+        // Adicionar aresta em ambas as direções
+        No* no_origem = grafo_agm->encontra_no_por_id(mapa_index_id[index_origem]);
+        No* no_alvo = grafo_agm->encontra_no_por_id(mapa_index_id[index_alvo]);
+        
+        if (!no_origem || !no_alvo)
+            throw runtime_error("Nó(s) não encontrados na AGM");
+
+        NoId id_no_origem = no_origem->get_id();
+        NoId id_no_alvo = no_alvo->get_id();
+
+        no_origem->adiciona_aresta(new Aresta(id_no_origem, id_no_alvo, aresta->get_peso()));
+        no_alvo->adiciona_aresta(new Aresta(id_no_alvo, id_no_origem, aresta->get_peso()));
+        
+        sao_arestas_possiveis[aresta_index] = false;
+        sao_arestas_incluidas[aresta_index] = true;
+    };
+
+    // Adicionando um nó qualquer do subconjunto
+
+    auto it = find(sao_nos_faltantes.begin(), sao_nos_faltantes.end(), true);
+    
+    if (it == sao_nos_faltantes.end())
+        throw runtime_error("Árvore AGM não inicializada");
+    
+    adiciona_no_agm(distance(sao_nos_faltantes.begin(), it));
+
+    // ATUALIZAÇÕES
+
+    while (true) {
+
+        // Encontrar aresta de menor peso
+        
+        int index_menor_aresta = -1;
+
+        for (int i=0; i<arestas.size(); i++) {
+            if (sao_arestas_possiveis[i]) {
+
+                if (index_menor_aresta == -1 
+                    || arestas[i]->get_peso() 
+                    < arestas[index_menor_aresta]->get_peso()
+                ) {
+                    index_menor_aresta = i;
+                }
+            }
+        }
+        
+        if (index_menor_aresta == -1)
+            throw runtime_error("Não foi encontrada aresta adequada.");
+
+        // Adicionar aresta (também atualiza as arestas possíveis)
+
+        adiciona_aresta_e_no_agm(index_menor_aresta);
+
+        int nos_incluidos = count(
+        
+            sao_nos_incluidos.begin(), 
+            sao_nos_incluidos.end(), 
+            true
+        );
+
+        if (nos_incluidos == ids_subconjunto.size())
+            break;
+    }
+
+    // TODO: Verificar por ciclos
+
+    return grafo_agm;
+}
+
+// Cria novo grafo
+
+// Adiciona um nó se for subconjunto
+// Marca como dentro
+
+// Verifica as arestas, verifi
+
+
+
+
+
+
+
+
+
+
+
+// ========================= FECHO TRANSITIVO INDIRETO =========================
+
+vector<NoId> Grafo::fecho_transitivo_indireto(NoId id_no) {
+
+    Grafo* transposto = gera_grafo_transposto();
+    
+    vector<NoId> fecho = transposto->fecho_transitivo_direto(id_no);
+
+    delete transposto;
+    return fecho;
+}
+
+Grafo* Grafo::gera_grafo_transposto() {
+    
+    Grafo* transposto = new Grafo();
+
+    for (No* no_original: lista_adj) {
+
+        transposto->adiciona_no(new No(no_original->get_id(), no_original->get_peso()));
+
+        for (Aresta* aresta : no_original->get_arestas()) {
+
+            transposto->adiciona_aresta(aresta->get_id_no_alvo(), 
+                                        aresta->get_id_no_origem(),
+                                        aresta->get_peso());
+        }
+    }
+
+    transposto->set_ordem(ordem);
+    transposto->set_direcionado(in_direcionado);
+    transposto->set_ponderado_aresta(in_ponderado_aresta);
+    transposto->set_ponderado_vertice(in_ponderado_vertice);
+
+    return transposto;
+}
+
+// =================================== FLOYD ===================================
+
+// d
+vector<NoId> Grafo::caminho_minimo_floyd(NoId id_no_origem, NoId id_no_alvo)
+{
+    // TODO: Verificar por ciclos negativos?
+
+    int INFINITO = numeric_limits<int>::max();
+    
+    auto mapa_index_id = get_mapa_index_id();
+    auto mapa_id_index = get_mapa_id_index();
+    
+    vector<vector<int>> dist;
+    vector<vector<int>> prox;
+    
+    calcular_matrizes_floyd(dist, prox);
+
+    // RECUPERAR CAMINHO 
+    vector<NoId> caminho = {};
+
+    int index_no_atual = mapa_id_index[id_no_origem];
+    int index_no_alvo = mapa_id_index[id_no_alvo];
+
+    // Verificar caminho impossível
+    if (dist[index_no_atual][index_no_alvo] == INFINITO 
+        || prox[index_no_atual][index_no_alvo] == -1)
+        return {};
+
+    // Enquanto não chegar no destino, adicionar os nós do caminho no vector
+    while (index_no_atual != index_no_alvo) {
+        caminho.push_back(mapa_index_id[index_no_atual]);
+        index_no_atual = prox[index_no_atual][index_no_alvo];
+    }
+
+    // Adicionando nó alvo
+    caminho.push_back(mapa_index_id[index_no_alvo]);
+
+    return caminho;
+}
+
+// d aux
 void Grafo::calcular_matrizes_floyd(vector<vector<int>>& dist, vector<vector<int>>& prox) 
 {
     if (!in_ponderado_aresta)
-        throw new runtime_error("Grafo precisa ser ponderado nas arestas.");
+        throw runtime_error("Grafo precisa ser ponderado nas arestas.");
 
     // Mapeamento de dois sentidos entre NoId e índice da matriz
 
@@ -740,110 +986,18 @@ void Grafo::calcular_matrizes_floyd(vector<vector<int>>& dist, vector<vector<int
 
     for (int i=0; i<ordem; i++) {
         if (dist[i][i] < 0) {
-            throw new runtime_error("Resultados inválidos para grafo com ciclo negativo");
+            throw runtime_error("Resultados inválidos para grafo com ciclo negativo");
         }
     }
 }
 
-// Gustavo
-vector<NoId> Grafo::caminho_minimo_floyd(NoId id_no_origem, NoId id_no_alvo)
-{
-    // TODO: Verificar por ciclos negativos?
+// ================================== MÉTRICAS =================================
 
-    int INFINITO = numeric_limits<int>::max();
-    
-    auto mapa_index_id = get_mapa_index_id();
-    auto mapa_id_index = get_mapa_id_index();
-    
-    vector<vector<int>> dist;
-    vector<vector<int>> prox;
-    
-    calcular_matrizes_floyd(dist, prox);
-
-    // RECUPERAR CAMINHO 
-    vector<NoId> caminho = {};
-
-    int index_no_atual = mapa_id_index[id_no_origem];
-    int index_no_alvo = mapa_id_index[id_no_alvo];
-
-    // Verificar caminho impossível
-    if (dist[index_no_atual][index_no_alvo] == INFINITO 
-        || prox[index_no_atual][index_no_alvo] == -1)
-        return {};
-
-    // Enquanto não chegar no destino, adicionar os nós do caminho no vector
-    while (index_no_atual != index_no_alvo) {
-        caminho.push_back(mapa_index_id[index_no_atual]);
-        index_no_atual = prox[index_no_atual][index_no_alvo];
-    }
-
-    // Adicionando nó alvo
-    caminho.push_back(mapa_index_id[index_no_alvo]);
-
-    return caminho;
-}
-
-// h1 - Gustavo
-int Grafo::get_raio()
-{
-    auto excentricidades = get_excentricidades();
-
-    auto it_raio = min_element(excentricidades.begin(), excentricidades.end());
-
-    if (it_raio == excentricidades.end())
-        throw new runtime_error("Raio inexistente");
-
-    return *it_raio;
-}
-
-// h2 - Gustavo
-int Grafo::get_diametro()
-{
-    auto excentricidades = get_excentricidades();
-
-    auto it_diametro = max_element(excentricidades.begin(), excentricidades.end());
-
-    if (it_diametro == excentricidades.end())
-        throw new runtime_error("Raio inexistente");
-
-    return *it_diametro;
-}
-
-// h3 - Gustavo
-vector<NoId> Grafo::get_centro()
-{
-    auto excentricidades = get_excentricidades();
-    auto mapa_index_id = get_mapa_index_id();
-    vector<NoId> centro;
-    int raio = get_raio();
-
-    for (int i=0; i<ordem; i++)
-        if (excentricidades[i] == raio)
-            centro.push_back(mapa_index_id[i]);
-    
-    return centro;
-}
-
-// h4 - Gustavo
-vector<NoId> Grafo::get_periferia()
-{
-    auto excentricidades = get_excentricidades();
-    auto mapa_index_id = get_mapa_index_id();
-    vector<NoId> centro;
-    int diametro = get_diametro();
-
-    for (int i=0; i<ordem; i++)
-        if (excentricidades[i] == diametro)
-            centro.push_back(mapa_index_id[i]);
-    
-    return centro;
-}
-
-// h auxiliar - Gustavo
+// h auxiliar
 vector<int> Grafo::get_excentricidades() 
 {
     if (!in_ponderado_aresta)
-        throw new runtime_error("Grafo deve ser ponderado nas arestas");
+        throw runtime_error("Grafo deve ser ponderado nas arestas");
 
     vector<vector<int>> dist;
     vector<vector<int>> prox;
@@ -866,9 +1020,96 @@ vector<int> Grafo::get_excentricidades()
             if (dist[i][j] > excentricidade)
                 excentricidade = dist[i][j];
         }
-        
+
         excentricidades[i] = excentricidade;
     }
         
     return excentricidades;
+}
+
+// h1
+int Grafo::get_raio()
+{
+    auto excentricidades = get_excentricidades();
+
+    auto it_raio = min_element(excentricidades.begin(), excentricidades.end());
+
+    if (it_raio == excentricidades.end())
+        throw runtime_error("Raio inexistente");
+
+    return *it_raio;
+}
+
+// h2
+int Grafo::get_diametro()
+{
+    auto excentricidades = get_excentricidades();
+
+    auto it_diametro = max_element(excentricidades.begin(), excentricidades.end());
+
+    if (it_diametro == excentricidades.end())
+        throw runtime_error("Raio inexistente");
+
+    return *it_diametro;
+}
+
+// h3
+vector<NoId> Grafo::get_centro()
+{
+    auto excentricidades = get_excentricidades();
+    auto mapa_index_id = get_mapa_index_id();
+    vector<NoId> centro;
+    int raio = get_raio();
+
+    for (int i=0; i<ordem; i++)
+        if (excentricidades[i] == raio)
+            centro.push_back(mapa_index_id[i]);
+    
+    return centro;
+}
+
+// h4
+vector<NoId> Grafo::get_periferia()
+{
+    auto excentricidades = get_excentricidades();
+    auto mapa_index_id = get_mapa_index_id();
+    vector<NoId> centro;
+    int diametro = get_diametro();
+
+    for (int i=0; i<ordem; i++)
+        if (excentricidades[i] == diametro)
+            centro.push_back(mapa_index_id[i]);
+    
+    return centro;
+}
+
+// ================================== EXTRA ====================================
+
+// Gustavo - aux
+unordered_map<int, NoId> Grafo::get_mapa_index_id() 
+{
+    unordered_map<int, NoId> mapa_index_id;
+
+    for (int index = 0; index < ordem; index++) {
+        NoId id = lista_adj[index]->get_id();
+        mapa_index_id.insert(pair<int, NoId>(index, id));
+    }
+
+    return mapa_index_id;
+}
+
+// Gustavo - aux
+unordered_map<NoId, int> Grafo::get_mapa_id_index() 
+{
+
+    unordered_map<NoId, int> mapa_id_index;
+
+    for (int index = 0; index < ordem; index++) {
+
+        // cout << index << " " << ordem << endl;
+        NoId id = lista_adj[index]->get_id();
+        mapa_id_index.insert(pair<NoId, int>(id, index));
+    }
+
+    return mapa_id_index;
 }

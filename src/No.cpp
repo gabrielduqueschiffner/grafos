@@ -2,9 +2,15 @@
 #include "types.h"
 
 No::No() {
-    peso = 0; // Inicializa o peso como 0
     id = '\0'; // Inicializa o id como nulo
+    peso = 0; // Inicializa o peso como 0
     arestas = vector<Aresta*>(); // Inicializa a lista de arestas vazia
+}
+
+No::No(NoId id_no, int peso) {
+    this->id = id_no; 
+    this->peso = peso; 
+    this->arestas = vector<Aresta*>(); 
 }
 
 No::~No() {
@@ -12,7 +18,6 @@ No::~No() {
         delete aresta; // Libera a memória alocada para as arestas
     }
 }
-
 
 void No::set_peso(int peso) {
     this->peso = peso;
@@ -38,5 +43,9 @@ void No::adiciona_aresta(NoId id_no_origem, NoId id_no_alvo, int peso) {
     aresta->set_id_no_alvo(id_no_alvo);
     aresta->set_peso(peso);
 
+    arestas.push_back(aresta);
+}
+
+void No::adiciona_aresta(Aresta* aresta) {
     arestas.push_back(aresta);
 }
