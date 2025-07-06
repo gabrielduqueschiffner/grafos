@@ -7,9 +7,9 @@
 #include "../include/types.h"
 
 using namespace std;
-class Gerenciador {
+class InterfaceConsole {
 public:
-    Gerenciador(Grafo* grafo);
+    InterfaceConsole(Grafo* grafo);
     void executar_menu();
     NoId get_id_entrada(int i=-1);
     vector<NoId> get_conjunto_ids(int tam);

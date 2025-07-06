@@ -1,10 +1,8 @@
-#include <algorithm>
-#include <string>
-#include "../include/Gerenciador.h"
+#include "../include/InterfaceConsole.h"
 #include "../include/types.h"
-#include "../include/Gerenciador.h"
+#include "../include/InterfaceConsole.h"
 
-Gerenciador::Gerenciador(Grafo* grafo) {
+InterfaceConsole::InterfaceConsole(Grafo* grafo) {
     
     this->grafo = grafo;
 
@@ -12,7 +10,7 @@ Gerenciador::Gerenciador(Grafo* grafo) {
         this->ids_nos.push_back(no->get_id());
 }
 
-void Gerenciador::executar_menu() {
+void InterfaceConsole::executar_menu() {
 
     cout <<
 
@@ -108,12 +106,12 @@ void Gerenciador::executar_menu() {
     executar_menu();
 }
 
-bool Gerenciador::no_existe(NoId id_no) {
+bool InterfaceConsole::no_existe(NoId id_no) {
 
     return find(ids_nos.begin(), ids_nos.end(), id_no) != ids_nos.end();
 }
 
-NoId Gerenciador::get_id_entrada(int i) {
+NoId InterfaceConsole::get_id_entrada(int i) {
     
     NoId id_no;
     
@@ -127,7 +125,7 @@ NoId Gerenciador::get_id_entrada(int i) {
     return id_no;
 }
 
-vector<NoId> Gerenciador::get_conjunto_ids(int tam) {
+vector<NoId> InterfaceConsole::get_conjunto_ids(int tam) {
 
     vector<NoId> input_ids = {};
 
@@ -153,7 +151,7 @@ vector<NoId> Gerenciador::get_conjunto_ids(int tam) {
     return input_ids;
 }
 
-vector<NoId> Gerenciador::get_conjunto_ids() {
+vector<NoId> InterfaceConsole::get_conjunto_ids() {
 
     cout << "Quantidade de nós a inserir: ";
     int tam;
@@ -163,7 +161,7 @@ vector<NoId> Gerenciador::get_conjunto_ids() {
     return get_conjunto_ids(tam);
 }
 
-bool Gerenciador::pergunta_imprimir_arquivo(string nome_arquivo) {
+bool InterfaceConsole::pergunta_imprimir_arquivo(string nome_arquivo) {
 
     cout<<"Imprimir em arquivo externo? ("<<nome_arquivo<<")"<<endl;
     cout<<"(1) Sim;"<<endl;
@@ -183,7 +181,7 @@ bool Gerenciador::pergunta_imprimir_arquivo(string nome_arquivo) {
     }
 }
 
-void Gerenciador::imprime_vector(vector<NoId> v) {
+void InterfaceConsole::imprime_vector(vector<NoId> v) {
 
     if (v.size() == 0) {
         

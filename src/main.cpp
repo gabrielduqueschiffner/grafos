@@ -1,6 +1,6 @@
 #include <iostream>
 #include <stdexcept>
-#include "../include/Gerenciador.h"
+#include "../include/InterfaceConsole.h"
 #include "../include/LeitorGrafo.h"
 #include "../include/types.h"
 
@@ -16,7 +16,7 @@ int main(int argc, char *argv[])
     cout << endl;
     grafo->imprime_grafo();
 
-    Gerenciador* gerenciador = new Gerenciador(grafo);
+    InterfaceConsole* gerenciador = new InterfaceConsole(grafo);
     gerenciador->executar_menu();
     
     // // TESTES
