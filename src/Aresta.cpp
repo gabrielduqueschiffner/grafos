@@ -1,5 +1,5 @@
-#include "Aresta.h"
-#include "types.h"
+#include "../include/Aresta.h"
+#include "../include/types.h"
 
 Aresta::Aresta() {
     id_no_origem = '\0'; // Inicializa o id do nó origem como nulo

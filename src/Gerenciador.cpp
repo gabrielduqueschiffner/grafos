@@ -1,7 +1,18 @@
-#include "Gerenciador.h"
-#include "types.h"
+#include <algorithm>
+#include <string>
+#include "../include/Gerenciador.h"
+#include "../include/types.h"
+#include "../include/Gerenciador.h"
 
-void Gerenciador::comandos(Grafo* grafo) {
+Gerenciador::Gerenciador(Grafo* grafo) {
+    
+    this->grafo = grafo;
+
+    for (No* no : grafo->get_lista_adj())
+        this->ids_nos.push_back(no->get_id());
+}
+
+void Gerenciador::executar_menu() {
 
     cout <<
 
@@ -20,203 +31,137 @@ void Gerenciador::comandos(Grafo* grafo) {
 
     char resp;
     cin >> resp;
+
+    // TODO: Resetar resultados
+    vector<NoId> nos_resultado;
+    Grafo* grafo_resultado;
+
     switch (resp) {
+        
         case 'a': {
-
-            NoId id_no = get_id_entrada();
-            vector<NoId> fecho_transitivo_direto = grafo->fecho_transitivo_direto(id_no);
-            //  grafo->imprime_vector(fecho_transitivo_direto);
-            cout<<endl<<endl;
-           
-
-            if(pergunta_imprimir_arquivo("fecho_trans_dir.txt")) {
-                grafo->exportar_vector_para_arquivo(fecho_transitivo_direto, "fecho_trans_dir.txt");
-                cout<<endl<<endl;
-            }
-
+            nos_resultado = grafo->fecho_transitivo_direto(get_id_entrada());
+            imprime_vector(nos_resultado);
             break;
         }
 
         case 'b':{
-
-            NoId id_no = get_id_entrada();
-            vector<NoId> fecho_transitivo_indireto = grafo->fecho_transitivo_indireto(id_no);
-            cout<<"Metodo de impressao em tela nao implementado"<<endl<<endl;
-
-            if(pergunta_imprimir_arquivo("fecho_trans_indir.txt")) {
-                cout<<"Metodo de impressao em arquivo nao implementado"<<endl;
-            }
-
+            nos_resultado = grafo->fecho_transitivo_indireto(get_id_entrada());
+            imprime_vector(nos_resultado);
             break;
         }
 
         case 'c': {
-
-            NoId id_no_1 = get_id_entrada();
-            NoId id_no_2 = get_id_entrada();
-            vector<NoId> caminho_minimo_dijkstra = grafo->caminho_minimo_dijkstra(id_no_1,id_no_2);
-            grafo->imprime_vector(caminho_minimo_dijkstra);
-            cout<<endl<<endl;
-
-            if(pergunta_imprimir_arquivo("caminho_minimo_dijkstra.txt")) {
-                grafo->exportar_vector_para_arquivo(caminho_minimo_dijkstra, "caminho_minimo_dijkstra.txt");
-                cout<<endl;
-            }
-
-
+            nos_resultado = grafo->caminho_minimo_dijkstra(get_id_entrada(1), get_id_entrada(2));
+            imprime_vector(nos_resultado);
             break;
         }
 
         case 'd': {
-
-            NoId id_no_1 = get_id_entrada();
-            NoId id_no_2 = get_id_entrada();
-            vector<NoId> caminho_minimo_floyd = grafo->caminho_minimo_floyd(id_no_1,id_no_2);
-            cout<<"Metodo de impressao em tela nao implementado"<<endl<<endl;
-
-            if(pergunta_imprimir_arquivo("caminho_minimo_floyd.txt")) {
-                cout<<"Metodo de impressao em arquivo nao implementado"<<endl;
-            }
-
-
+            nos_resultado = grafo->caminho_minimo_floyd(get_id_entrada(1), get_id_entrada(2));
+            imprime_vector(nos_resultado);
             break;
         }
+
         case 'e': {
 
-            int tam;
-            cout<<"Digite o tamanho do subconjunto: ";
-            cin>>tam;
-
-            if(tam > 0 && tam <= grafo->get_ordem()) {
-
-                vector<NoId> ids = get_conjunto_ids(grafo,tam);
-                Grafo* arvore_geradora_minima_prim = grafo->arvore_geradora_minima_prim(ids);
-                cout<<"Metodo de impressao em tela nao implementado"<<endl<<endl;
-
-                if(pergunta_imprimir_arquivo("agm_prim.txt")) {
-                    cout<<"Metodo de impressao em arquivo nao implementado"<<endl;
-                }
-
-                delete arvore_geradora_minima_prim;
-
-            }else {
-                cout<<"Valor invalido"<<endl;
-            }
-
+            grafo_resultado = grafo->arvore_geradora_minima_prim(get_conjunto_ids());
+            grafo_resultado->imprime_grafo();
             break;
         }
 
         case 'f': {
-
-            int tam;
-            cout<<"Digite o tamanho do subconjunto: ";
-            cin>>tam;
-
-            if(tam > 0 && tam <= grafo->get_ordem()) {
-
-                vector<NoId> ids = get_conjunto_ids(grafo,tam);
-                Grafo* arvore_geradora_minima_kruskal = grafo->arvore_geradora_minima_kruskal(ids);
-                arvore_geradora_minima_kruskal->imprime_grafo();
-                cout<<endl<<endl;
-
-                if(pergunta_imprimir_arquivo("agm_kruskal.txt")) {
-                   arvore_geradora_minima_kruskal->exportar_grafo_para_arquivo(arvore_geradora_minima_kruskal, "agm_kruskal.txt");
-                   
-                }
-
-                delete arvore_geradora_minima_kruskal;
-
-            }else {
-                cout<<"Valor invalido"<<endl;
-            }
-
+            grafo_resultado = grafo->arvore_geradora_minima_kruskal(get_conjunto_ids());
+            grafo_resultado->imprime_grafo();
             break;
         }
 
         case 'g': {
 
-            NoId id_no = get_id_entrada();
-            Grafo* arvore_caminhamento_profundidade = grafo->arvore_caminhamento_profundidade(id_no);
-            arvore_caminhamento_profundidade->imprime_grafo();
-            cout<<endl<<endl;
-            if(pergunta_imprimir_arquivo("arvore_caminhamento_profundidade.txt")) {
-              grafo->exportar_grafo_para_arquivo(arvore_caminhamento_profundidade, "arvore_caminhamento_profundidade.txt");
-            }
-
-            delete arvore_caminhamento_profundidade;
+            grafo_resultado = grafo->arvore_caminhamento_profundidade(get_id_entrada());
+            grafo_resultado->imprime_grafo();
             break;
         }
 
         case 'h': {
-            vector<NoId> articulacao = grafo->vertices_de_articulacao();
-            cout<<"Metodo de impressao em tela nao implementado"<<endl<<endl;
 
-            if(pergunta_imprimir_arquivo("arvore_caminhamento_profundidade.txt")) {
-                cout<<"Metodo de impressao em arquivo nao implementado"<<endl;
-            }
+            // TODO: Como escrever esses resultados em arquivo?
 
-            break;
-        }
-        case 'i': {
-
-            vector<NoId> articulacao = grafo->vertices_de_articulacao();
-            cout<<"Metodo de impressao em tela nao implementado"<<endl<<endl;
-
-            if(pergunta_imprimir_arquivo("arvore_caminhamento_profundidade.txt")) {
-                cout<<"Metodo de impressao em arquivo nao implementado"<<endl;
-            }
-
+            cout << "Raio: " + to_string(grafo->get_raio()) << endl;
+            cout << "Centro: "; grafo->get_centro();
+            cout << "Diâmetro : " + to_string(grafo->get_diametro()) << endl;
+            cout << "Periferia: "; grafo->get_periferia();
             break;
         }
 
         case '0': {
-            exit(0);
+            return;
         }
+
         default: {
-            cout<<"Opção inválida"<<endl;
+
+            cout << "Opção inválida" << endl << endl;
         }
     }
 
-    comandos(grafo);
+    // Verificar qual dos dados foi escrito, e oferecer escrita
 
+    executar_menu();
 }
 
-NoId Gerenciador::get_id_entrada() {
-    cout<<"Digite o id de um no: ";
-    NoId id;
-    cin>>id;
-    cout<<endl;
-    return id;
+bool Gerenciador::no_existe(NoId id_no) {
+
+    return find(ids_nos.begin(), ids_nos.end(), id_no) != ids_nos.end();
 }
 
-vector<NoId> Gerenciador::get_conjunto_ids(Grafo *grafo, int tam) {
-    vector<NoId> ids = {};
-    while((int)ids.size() < tam) {
-        NoId id_no =get_id_entrada();
-        bool existe = false;
-        for(No* no: grafo->get_lista_adj()) {
-            if(no->id == id_no){
-                existe = true;
-                break;
-            }
+NoId Gerenciador::get_id_entrada(int i) {
+    
+    NoId id_no;
+    
+    do {
+        
+        cout << "Digite um ID válido para o nó " + (i == -1 ? "" : to_string(i)) + ": ";
+        cin >> id_no;
+
+    } while (!no_existe(id_no));
+
+    return id_no;
+}
+
+vector<NoId> Gerenciador::get_conjunto_ids(int tam) {
+
+    vector<NoId> input_ids = {};
+
+    for (int i=0; i<tam; i++) {
+
+        NoId id_no = get_id_entrada(i);
+
+        if (find(input_ids.begin(), input_ids.end(),id_no) != input_ids.end()) { 
+            
+            cout << "Valor repetido." << endl;
+            i--;
+            continue;
         }
 
-        if(!existe){
-            cout<<"Vertice nao existe"<<endl;
-        }else{
-            bool repetido = find(ids.begin(), ids.end(),id_no) != ids.end();
-            if (repetido) {
-                    cout<<"Valor repetido"<<endl;
-            } else {
-                ids.push_back(id_no);
-            }
-        }
-
+        input_ids.push_back(id_no);
     }
 
-    return ids;
+    cout << "IDs inseridos: ";
+    for (NoId id_no : input_ids)
+        cout << id_no << " ";
+    cout << endl;
+
+    return input_ids;
 }
 
+vector<NoId> Gerenciador::get_conjunto_ids() {
+
+    cout << "Quantidade de nós a inserir: ";
+    int tam;
+    cin >> tam;
+    cout << endl;
+
+    return get_conjunto_ids(tam);
+}
 
 bool Gerenciador::pergunta_imprimir_arquivo(string nome_arquivo) {
 
@@ -235,5 +180,25 @@ bool Gerenciador::pergunta_imprimir_arquivo(string nome_arquivo) {
         default:
             cout<<"Resposta invalida"<<endl;
             return pergunta_imprimir_arquivo(nome_arquivo);
+    }
+}
+
+void Gerenciador::imprime_vector(vector<NoId> v) {
+
+    if (v.size() == 0) {
+        
+        return;
+
+    } else {
+
+        for (size_t i = 0; i < v.size(); ++i) {
+            
+            cout << v[i];
+
+            if (i + 1 < v.size()) {
+                cout << ",";
+            }
+        }
+        cout << endl;
     }
 }

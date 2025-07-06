@@ -1,5 +1,5 @@
-#include "No.h"
-#include "types.h"
+#include "../include/No.h"
+#include "../include/types.h"
 
 No::No() {
     id = '\0'; // Inicializa o id como nulo
@@ -34,16 +34,6 @@ int No::get_peso() {
 }
 vector<Aresta*> No::get_arestas() {
     return arestas;
-}
-
-void No::adiciona_aresta(NoId id_no_origem, NoId id_no_alvo, int peso) {
-
-    Aresta* aresta = new Aresta();
-    aresta->set_id_no_origem(id_no_origem);
-    aresta->set_id_no_alvo(id_no_alvo);
-    aresta->set_peso(peso);
-
-    arestas.push_back(aresta);
 }
 
 void No::adiciona_aresta(Aresta* aresta) {

@@ -1,9 +1,8 @@
 #include <iostream>
 #include <stdexcept>
-#include <string>
-#include "Gerenciador.h"
-#include "LeitorGrafo.h"
-#include "types.h"
+#include "../include/Gerenciador.h"
+#include "../include/LeitorGrafo.h"
+#include "../include/types.h"
 
 using namespace std;
 int main(int argc, char *argv[])
@@ -17,19 +16,16 @@ int main(int argc, char *argv[])
     cout << endl;
     grafo->imprime_grafo();
 
-    Gerenciador::comandos(grafo);
+    Gerenciador* gerenciador = new Gerenciador(grafo);
+    gerenciador->executar_menu();
     
-    // TESTES
+    // // TESTES
+    // cout << endl;
+    // grafo->arvore_geradora_minima_prim({'d', 'b', 'e'})->imprime_grafo();
+    // cout << endl;
 
-    for (NoId id : grafo->get_centro())
-        cout << id << " ";
-
-    cout<< endl;
-
-    for (NoId id : grafo->get_periferia())
-        cout << id << " ";
-
-    cout << endl;
+    delete grafo;
+    delete gerenciador;
 
     return 0;
 }

@@ -44,13 +44,11 @@ public:
 
     No *encontra_no_por_id(NoId id) const; // Busca linear por ID
     
-    void adiciona_no(NoId id_no, int peso = 0);
     void adiciona_no(No* no);
     void adiciona_aresta(NoId id_no_origem, NoId id_no_alvo, int peso=0);
 
     // Funções de impressão no console
     void imprime_grafo();
-    void imprime_vector(vector<NoId> v);
     void imprime_resumo_grafo();
 
     // Funções de exportação para arquivo
@@ -63,17 +61,16 @@ public:
     vector<NoId> fecho_transitivo_indireto(NoId id_no);               // b
     vector<NoId> caminho_minimo_dijkstra(NoId id_no_a, NoId id_no_b); // c
     vector<NoId> caminho_minimo_floyd(NoId id_no, NoId id_no_b);      // d
-    Grafo *arvore_geradora_minima_prim(vector<NoId> ids_nos);         // e
-    Grafo *arvore_geradora_minima_kruskal(vector<NoId> ids_nos);      // f
-    Grafo *arvore_caminhamento_profundidade(NoId id_no);              // g
+    Grafo* arvore_geradora_minima_prim(vector<NoId> ids_nos);         // e
+    Grafo* arvore_geradora_minima_kruskal(vector<NoId> ids_nos);      // f
+    Grafo* arvore_caminhamento_profundidade(NoId id_no);              // g
     int get_raio();                                                   // h 1
     int get_diametro();                                               // h 2
     vector<NoId> get_centro();                                        // h 3
     vector<NoId> get_periferia();                                     // h 4
-    vector<NoId> vertices_de_articulacao();                           // i
 
     /// DEBUG
-    void imprimeMatriz(vector<vector<int>> mat) {
+    void imprime_matriz(vector<vector<int>> mat) {
 
         for (int i = 0; i < static_cast<int>(mat.size()); ++i) {
             for (int j = 0; j < static_cast<int>(mat[i].size()); ++j) {
