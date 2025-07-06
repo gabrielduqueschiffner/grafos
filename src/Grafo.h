@@ -16,6 +16,7 @@
 #include <sstream>
 #include <unordered_map>
 #include <vector>
+#include <numeric>
 
 using namespace std;
 
@@ -74,8 +75,8 @@ public:
     /// DEBUG
     void imprimeMatriz(vector<vector<int>> mat) {
 
-        for (int i = 0; i < mat.size(); ++i) {
-            for (int j = 0; j < mat[i].size(); ++j) {
+        for (int i = 0; i < static_cast<int>(mat.size()); ++i) {
+            for (int j = 0; j < static_cast<int>(mat[i].size()); ++j) {
 
                 if (mat[i][j] == numeric_limits<int>::max())
                     cout << setw(3) << left << "-";
@@ -96,10 +97,10 @@ private:
     // Auxiliares
     void dfs_arvore_aux(int indice_no,
                         vector<bool> &visitado,
-                        const unordered_map<NoId, int> &mapa_id_para_indice, vector<Aresta *> &tree_edges);
+                        const unordered_map<NoId, int> &mapa_id_para_indice, vector<Aresta *> &arestas_arvore);
 
     void dfs_fecho_transitivo_direto(int indice_no,
-                                     vector<NoId> &marcado,
+                                     vector<bool> &marcado,
                                      vector<NoId> &resultado,
                                      const unordered_map<NoId, int> &mapa_id_para_indice);
 
