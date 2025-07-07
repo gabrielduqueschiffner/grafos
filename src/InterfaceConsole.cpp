@@ -1,6 +1,7 @@
 #include "../include/InterfaceConsole.h"
 #include "../include/types.h"
 #include "../include/InterfaceConsole.h"
+#include <ostream>
 
 InterfaceConsole::InterfaceConsole(Grafo* grafo) {
     
@@ -14,7 +15,7 @@ void InterfaceConsole::executar_menu() {
 
     cout <<
 
-        "\n => Digite uma das opcoes abaixo e pressione enter:"
+        "\n => Digite uma das opcoes abaixo e pressione enter:\n"
         "\n (a) Fecho transitivo direto de um no"
         "\n (b) Fecho transitivo indireto de um no"
         "\n (c) Caminho minimo (Djikstra)"
@@ -27,12 +28,14 @@ void InterfaceConsole::executar_menu() {
 
     << endl;
 
+    cout << endl << "=> Sua opção: ";
     char resp;
     cin >> resp;
+    cout << endl;
 
     // TODO: Resetar resultados
-    vector<NoId> nos_resultado;
-    Grafo* grafo_resultado;
+    vector<NoId> nos_resultado = {'\0'};
+    Grafo* grafo_resultado = nullptr;
 
     switch (resp) {
         
@@ -49,13 +52,13 @@ void InterfaceConsole::executar_menu() {
         }
 
         case 'c': {
-            nos_resultado = grafo->caminho_minimo_dijkstra(get_id_entrada(1), get_id_entrada(2));
+            nos_resultado = grafo->caminho_minimo_dijkstra(get_id_entrada(1), get_id_entrada(0));
             imprime_vector(nos_resultado);
             break;
         }
 
         case 'd': {
-            nos_resultado = grafo->caminho_minimo_floyd(get_id_entrada(1), get_id_entrada(2));
+            nos_resultado = grafo->caminho_minimo_floyd(get_id_entrada(1), get_id_entrada(0));
             imprime_vector(nos_resultado);
             break;
         }
@@ -82,12 +85,12 @@ void InterfaceConsole::executar_menu() {
 
         case 'h': {
 
-            // TODO: Como escrever esses resultados em arquivo?
-
             cout << "Raio: " + to_string(grafo->get_raio()) << endl;
-            cout << "Centro: "; grafo->get_centro();
-            cout << "Diâmetro : " + to_string(grafo->get_diametro()) << endl;
-            cout << "Periferia: "; grafo->get_periferia();
+            cout << "Centro: "; imprime_vector(grafo->get_centro());
+            cout << endl;
+            cout << "Diâmetro: " + to_string(grafo->get_diametro()) << endl;
+            cout << "Periferia: "; imprime_vector(grafo->get_periferia());
+            cout << endl;
             break;
         }
 
@@ -101,7 +104,15 @@ void InterfaceConsole::executar_menu() {
         }
     }
 
-    // Verificar qual dos dados foi escrito, e oferecer escrita
+    // Imprimindo resultados
+
+    if (grafo_resultado)
+        grafo_resultado->imprime_grafo();
+
+    if (nos_resultado.size() == 1 && nos_resultado[0] == '\0')
+        imprime_vector(nos_resultado);
+
+    // Retornando pro menu
 
     executar_menu();
 }
@@ -117,7 +128,7 @@ NoId InterfaceConsole::get_id_entrada(int i) {
     
     do {
         
-        cout << "Digite um ID válido para o nó " + (i == -1 ? "" : to_string(i)) + ": ";
+        cout << "Digite um ID válido para o nó" + (i == -1 ? "" : " " + to_string(i)) + ": ";
         cin >> id_no;
 
     } while (!no_existe(id_no));
@@ -133,7 +144,7 @@ vector<NoId> InterfaceConsole::get_conjunto_ids(int tam) {
 
         NoId id_no = get_id_entrada(i);
 
-        if (find(input_ids.begin(), input_ids.end(),id_no) != input_ids.end()) { 
+        if (find(input_ids.begin(), input_ids.end(), id_no) != input_ids.end()) { 
             
             cout << "Valor repetido." << endl;
             i--;
@@ -197,6 +208,5 @@ void InterfaceConsole::imprime_vector(vector<NoId> v) {
                 cout << ",";
             }
         }
-        cout << endl;
     }
 }
