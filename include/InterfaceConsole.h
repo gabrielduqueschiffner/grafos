@@ -17,7 +17,7 @@ public:
     bool pergunta_imprimir_arquivo(string nome_arquivo);
     bool no_existe(NoId id_no);
     void imprime_vector(vector<NoId> v);
-
+    
 private:
     Grafo* grafo;
     vector<NoId> ids_nos;

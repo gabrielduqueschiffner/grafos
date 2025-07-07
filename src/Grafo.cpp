@@ -240,7 +240,8 @@ vector<NoId> Grafo::fecho_transitivo_direto(NoId id_no) {
     auto it = mapa_id_index.find(id_no); // busca pelo ID do nó inicial
     
     if (it == mapa_id_index.end()) 
-        throw runtime_error("Vértice '" + to_string(id_no) + "' não existe no grafo.");
+        throw runtime_error(string("Vértice '") + string(1,id_no) + string("' não existe no grafo."));
+       
 
     int idx_inicio = it->second; 
 
@@ -283,14 +284,18 @@ vector<NoId> Grafo::caminho_minimo_dijkstra(NoId id_origem, NoId id_destino) {
     if (numero_vertices == 0)
         throw runtime_error("Grafo vazio");
 
+    if (!in_ponderado_aresta)
+        throw runtime_error("Grafo precisa ser ponderado nas arestas.");
+
     // 1) Mapa de ID → índice
     auto mapa_id_para_indice = get_mapa_id_index();
 
     if (!mapa_id_para_indice.count(id_origem))
-        throw runtime_error("Vértice de origem '" + to_string(id_origem) + "' não existe no grafo.");
+        throw runtime_error(string("Vértice de origem '") + string(1, id_origem)  + "' não existe no grafo.");
 
     if (!mapa_id_para_indice.count(id_destino))
-        throw runtime_error("Vértice de destino '" + to_string(id_destino) + "' não existe no grafo.");
+        throw runtime_error(string("Vértice de destino '") + string(1, id_destino)  + "' não existe no grafo.");
+
 
     int indice_origem  = mapa_id_para_indice[id_origem];
     int indice_destino = mapa_id_para_indice[id_destino];
@@ -335,7 +340,8 @@ vector<NoId> Grafo::caminho_minimo_dijkstra(NoId id_origem, NoId id_destino) {
 
     // 4) Reconstrói o caminho de destino a origem
     if (distancia[indice_destino] == INFINITO)
-        throw runtime_error("Não existe caminho de '" + to_string(id_origem) + "' até '" + to_string(id_destino));
+        throw runtime_error(string("Não existe caminho de '") + string(1, id_origem) + string("' até '") + string(1,id_destino));
+        
 
     vector<NoId> caminho;
     for (int atual = indice_destino; atual != -1; atual = antecessor[atual])
@@ -373,7 +379,9 @@ Grafo* Grafo::arvore_geradora_minima_kruskal(vector<NoId> ids_nos) {
         NoId id = ids_nos[i];
 
         if (!mapa_global.count(id))
-            throw runtime_error("Vértice '" + to_string(id) + "' não existe no grafo original.");
+            throw runtime_error(string("Vértice '") + string(1,id) + string("' não existe no grafo original."));
+           
+
 
         mapa_local[id] = i;
     }
@@ -453,7 +461,9 @@ Grafo *Grafo::arvore_caminhamento_profundidade(NoId id_no) {
     auto it = mapa_id_index.find(id_no); // busca pelo ID do nó inicial
 
     if (it == mapa_id_index.end())
-        throw runtime_error("Nó inicial '" + to_string(id_no) + "' não encontrado.");
+        throw runtime_error(string("Nó inicial '") + string(1,id_no) + string("' não encontrado."));
+    
+
 
     int indice_inicio = it->second;
 
@@ -463,7 +473,9 @@ Grafo *Grafo::arvore_caminhamento_profundidade(NoId id_no) {
     arestas_arvore.reserve(n - 1); // reserva espaço para arestas de árvore
 
     // 3) DFS recursivo que coleta as arestas de árvore
+    cout << "Caminho em profundidade: ";
     dfs_arvore_aux(indice_inicio, visitado, mapa_id_index, arestas_arvore);
+    cout << endl << endl;
 
     // 4) Montar o grafo-árvore a partir dessas arestas
     Grafo *arvore = new Grafo();
@@ -572,7 +584,7 @@ Grafo *Grafo::arvore_geradora_minima_prim(vector<NoId> ids_subconjunto) {
     // TODO: Verificar conectividade?
 
     if (in_direcionado)
-        throw runtime_error("Método de Prim é inválido para ávores direcionadas");
+        throw runtime_error("Método de Prim é inválido para árvores direcionadas");
 
     // Verificar se o subconjunto não está vazio
     if (ids_subconjunto.empty())

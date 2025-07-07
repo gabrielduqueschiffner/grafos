@@ -37,6 +37,9 @@ public:
             iss >> ordem;
         }
     
+        
+        
+
         // Lê a segunda linha
 
         if (!getline(arquivoEntrada, linha)) 
@@ -44,6 +47,12 @@ public:
         
         istringstream iss(linha);
         iss >> ordem;
+
+        // verifica se é grafo nulo ou trivial
+
+        if(ordem == 0 || ordem == 1) 
+             throw new runtime_error("Grafo nulo ou trivial não fazem sentido.");  //PORQUE N MANDA A MSG NO CONSOLE SÓ DA O ERROR???
+          
 
         // Gerando a lista de nós do grafo e setando os seus pesos caso seja
         // ponderado

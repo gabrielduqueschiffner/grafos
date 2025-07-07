@@ -33,6 +33,9 @@ void InterfaceConsole::executar_menu() {
     cin >> resp;
     cout << endl;
 
+    
+
+
     // TODO: Resetar resultados
     vector<NoId> nos_resultado = {'\0'};
     Grafo* grafo_resultado = nullptr;
@@ -130,6 +133,11 @@ NoId InterfaceConsole::get_id_entrada(int i) {
         
         cout << "Digite um ID válido para o nó" + (i == -1 ? "" : " " + to_string(i)) + ": ";
         cin >> id_no;
+        if(id_no == '\0') {
+            cout << "ID inválido. Tente novamente." << endl;
+            continue;
+        }
+        cout << endl;
 
     } while (!no_existe(id_no));
 
@@ -208,5 +216,10 @@ void InterfaceConsole::imprime_vector(vector<NoId> v) {
                 cout << ",";
             }
         }
+        cout << endl;
     }
 }
+
+
+
+
