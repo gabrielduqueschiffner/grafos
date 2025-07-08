@@ -55,6 +55,7 @@ public:
     void exportar_grafo_para_arquivo(Grafo *g, const string &nome_arquivo);
     void exportar_grafo_para_arquivo_csacademy(Grafo *g, const string &nome_arquivo);
     void exportar_vector_para_arquivo(const vector<NoId> &v, const string &nome_arquivo);
+    void exportar_metricas_para_arquivo(Grafo *g, const string &nome_arquivo);
 
     // Funções principais do trabalho
     vector<NoId> fecho_transitivo_direto(NoId id_no);                 // a

@@ -139,6 +139,57 @@ void Grafo::exportar_grafo_para_arquivo(Grafo *g, const string &nome_arquivo) {
     cout << "Grafo exportado em " << nome_arquivo << endl;
 }
 
+// Exporta as métricas do grafo para um arquivo  (Esta bugado nao usar)
+// Formato:
+// Raio: <raio>
+// Centro: <id1,id2,...>
+// Diâmetro: <diametro>
+// Periferia: <id1,id2,...>
+void Grafo::exportar_metricas_para_arquivo(Grafo *g, const string& nome_arquivo) {
+    ofstream arquivo(nome_arquivo);
+    if (!arquivo.is_open()) {
+        cerr << "Erro ao abrir o arquivo para escrita: " 
+                  << nome_arquivo << endl;
+        return;
+    }
+
+    // 1) Raio
+    arquivo << "Raio: " << get_raio() << "\n";
+
+    // 2) Centro (vetor de NoId)
+    arquivo << "Centro: ";
+    {
+        const auto& centros = get_centro();
+        for (size_t i = 0; i < centros.size(); ++i) {
+            arquivo << centros[i];
+            if (i + 1 < centros.size()) arquivo << ",";
+        }
+        arquivo << "\n";
+    }
+
+    // linha em branco
+    arquivo << "\n";
+
+    // 3) Diâmetro
+    arquivo << "Diâmetro: " << get_diametro() << "\n";
+
+    // 4) Periferia (vetor de NoId)
+    arquivo << "Periferia: ";
+    {
+        const auto& periferia = get_periferia();
+        for (size_t i = 0; i < periferia.size(); ++i) {
+            arquivo << periferia[i];
+            if (i + 1 < periferia.size()) arquivo << ",";
+        }
+        arquivo << "\n";
+    }
+
+    arquivo.close();
+    cout << "Métricas exportadas em " << nome_arquivo << endl;
+}
+
+
+
 void Grafo::exportar_grafo_para_arquivo_csacademy(Grafo *g, const string &nome_arquivo) {
     
     ofstream arquivo(nome_arquivo);

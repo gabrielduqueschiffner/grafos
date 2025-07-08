@@ -129,6 +129,11 @@ void InterfaceConsole::executar_menu() {
             cout << "Diâmetro: " + to_string(grafo->get_diametro()) << endl;
             cout << "Periferia: "; imprime_vector(grafo->get_periferia());
             cout << endl;
+            //  if(pergunta_imprimir_arquivo("raio_diametro_centro_periferia.txt")) {
+            //     grafo_resultado->exportar_metricas_para_arquivo(grafo_resultado, "raio_diametro_centro_periferia.txt");
+              
+
+            //  }
           
             break;
         }
@@ -255,7 +260,3 @@ void InterfaceConsole::imprime_vector(vector<NoId> v) {
         cout << endl;
     }
 }
-
-
-
-
