@@ -1,6 +1,6 @@
 #include "../include/InterfaceConsole.h"
 #include "../include/types.h"
-#include "../include/InterfaceConsole.h"
+
 #include <ostream>
 
 InterfaceConsole::InterfaceConsole(Grafo* grafo) {
@@ -45,24 +45,44 @@ void InterfaceConsole::executar_menu() {
         case 'a': {
             nos_resultado = grafo->fecho_transitivo_direto(get_id_entrada());
             imprime_vector(nos_resultado);
+             if(pergunta_imprimir_arquivo("fecho_trans_dir.txt")) {
+                grafo->exportar_vector_para_arquivo(nos_resultado, "fecho_trans_dir.txt");
+                
+              
+            }
             break;
         }
 
         case 'b':{
             nos_resultado = grafo->fecho_transitivo_indireto(get_id_entrada());
             imprime_vector(nos_resultado);
+             if(pergunta_imprimir_arquivo("fecho_trans_indir.txt")) {
+                grafo->exportar_vector_para_arquivo(nos_resultado, "fecho_trans_indir.txt");
+                
+              
+             }
             break;
         }
 
         case 'c': {
             nos_resultado = grafo->caminho_minimo_dijkstra(get_id_entrada(1), get_id_entrada(0));
             imprime_vector(nos_resultado);
+             if(pergunta_imprimir_arquivo("caminho_minimo_dijkstra.txt")) {
+                grafo->exportar_vector_para_arquivo(nos_resultado, "caminho_minimo_dijkstra.txt");
+               
+               
+             }
             break;
         }
 
         case 'd': {
             nos_resultado = grafo->caminho_minimo_floyd(get_id_entrada(1), get_id_entrada(0));
             imprime_vector(nos_resultado);
+             if(pergunta_imprimir_arquivo("caminho_minimo_floyd.txt")) {
+                grafo->exportar_vector_para_arquivo(nos_resultado, "caminho_minimo_floyd.txt");
+                
+               
+             }
             break;
         }
 
@@ -70,12 +90,22 @@ void InterfaceConsole::executar_menu() {
 
             grafo_resultado = grafo->arvore_geradora_minima_prim(get_conjunto_ids());
             grafo_resultado->imprime_grafo();
+             if(pergunta_imprimir_arquivo("agm_prim.txt")) {
+                grafo_resultado->exportar_grafo_para_arquivo(grafo_resultado, "agm_prim.txt");
+               
+
+             }
             break;
         }
 
         case 'f': {
             grafo_resultado = grafo->arvore_geradora_minima_kruskal(get_conjunto_ids());
             grafo_resultado->imprime_grafo();
+             if(pergunta_imprimir_arquivo("agm_kruskal.txt")) {
+                grafo_resultado->exportar_grafo_para_arquivo(grafo_resultado, "agm_kruskal.txt");
+                
+
+             }
             break;
         }
 
@@ -83,6 +113,11 @@ void InterfaceConsole::executar_menu() {
 
             grafo_resultado = grafo->arvore_caminhamento_profundidade(get_id_entrada());
             grafo_resultado->imprime_grafo();
+             if(pergunta_imprimir_arquivo("arvore_caminhamento_profundidade.txt")) {
+                grafo_resultado->exportar_grafo_para_arquivo(grafo_resultado, "arvore_caminhamento_profundidade.txt");
+              
+           
+             }
             break;
         }
 
@@ -94,6 +129,7 @@ void InterfaceConsole::executar_menu() {
             cout << "Diâmetro: " + to_string(grafo->get_diametro()) << endl;
             cout << "Periferia: "; imprime_vector(grafo->get_periferia());
             cout << endl;
+          
             break;
         }
 
@@ -109,11 +145,11 @@ void InterfaceConsole::executar_menu() {
 
     // Imprimindo resultados
 
-    if (grafo_resultado)
-        grafo_resultado->imprime_grafo();
+    // if (grafo_resultado)
+    //     grafo_resultado->imprime_grafo();
 
-    if (nos_resultado.size() == 1 && nos_resultado[0] == '\0')
-        imprime_vector(nos_resultado);
+    // if (nos_resultado.size() == 1 && nos_resultado[0] == '\0')
+    //     imprime_vector(nos_resultado);
 
     // Retornando pro menu
 

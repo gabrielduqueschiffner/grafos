@@ -1,5 +1,5 @@
-#ifndef GERENCIADOR_H
-#define GERENCIADOR_H
+#ifndef INTERFACECONSOLE_H
+#define INTERFACECONSOLE_H
 
 #include "Grafo.h"
 #include "types.h"
@@ -24,4 +24,4 @@ private:
 };
 
 
-#endif //GERENCIADOR_H
+#endif //INTERFACECONSOLE_H
