@@ -21,6 +21,7 @@ public:
     vector<Aresta*> get_arestas();
     void adiciona_aresta(Aresta* aresta);
 
+private:
     char id;
     int peso;
     vector<Aresta*> arestas;

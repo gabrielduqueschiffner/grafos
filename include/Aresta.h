@@ -18,6 +18,7 @@ public:
     NoId get_id_no_origem();
     int get_peso();
 
+private:
     NoId id_no_alvo, id_no_origem;  //aresta de entrada e saida
     int peso;
 };
