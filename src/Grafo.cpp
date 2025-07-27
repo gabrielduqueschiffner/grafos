@@ -871,7 +871,7 @@ void Grafo::calcular_matrizes_floyd(vector<vector<int>>& dist, vector<vector<int
 
         for (Aresta* aresta : arestas) {
 
-            int j = mapa_id_index[aresta->id_no_alvo];
+            int j = mapa_id_index[aresta->get_id_no_alvo()];
             dist[i][j] = aresta->get_peso();
             prox[i][j] = j;
         }
