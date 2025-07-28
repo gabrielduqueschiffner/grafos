@@ -1,6 +1,7 @@
+#include <cstdlib>
 #include <iostream>
 #include <stdexcept>
-#include "../include/InterfaceConsole.h"
+// #include "../include/InterfaceConsole.h"
 #include "../include/LeitorGrafo.h"
 #include "../include/types.h"
 
@@ -12,20 +13,26 @@ int main(int argc, char *argv[])
     
     Grafo* grafo = LeitorGrafo::lerDeArquivo(argv[1]);
 
+    for (No* no : grafo->get_lista_adj()) {
+        for (Aresta* aresta : no->get_arestas()) {
+            bool domina = rand() / (float)RAND_MAX > 0.5;
+            aresta->set_domina(domina);
+        }
+    }
+
     grafo->imprime_resumo_grafo();
     cout << endl;
     grafo->imprime_grafo();
 
-    InterfaceConsole* gerenciador = new InterfaceConsole(grafo);
-    gerenciador->executar_menu();
+
+    // InterfaceConsole* gerenciador = new InterfaceConsole(grafo);
+    // gerenciador->executar_menu();
     
-    // // TESTES
-    // cout << endl;
-    // grafo->arvore_geradora_minima_prim({'d', 'b', 'e'})->imprime_grafo();
-    // cout << endl;
+    // TESTES
+    // grafo->conjunto_dominante_arestas()->imprime_grafo();
 
     delete grafo;
-    delete gerenciador;
+    // delete gerenciador;
 
     return 0;
 }

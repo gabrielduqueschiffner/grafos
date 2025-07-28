@@ -1,6 +1,10 @@
 #include <algorithm>
+#include <cstdlib>
+#include <iterator>
 #include <stdexcept>
 #include <string>
+#include <unordered_map>
+#include <utility>
 #include <vector>
 #include "../include/Grafo.h"
 #include "../include/Aresta.h"
@@ -9,6 +13,87 @@
 
 const int INFINITO = numeric_limits<int>::max();
 const int MENOS_INFINITO = numeric_limits<int>::min();
+
+// =======================================
+// Guloso
+// =======================================
+
+Grafo* Grafo::conjunto_dominante_arestas(float alpha) {
+
+    /*
+    guloso random usa uma folga
+    Separa todos dentro da folga
+    Escolhe dentre eles
+    */
+
+    auto grau_total = [this](Aresta* aresta){
+        return encontra_no_por_id(aresta->get_id_no_alvo())->get_arestas().size() 
+        + encontra_no_por_id(aresta->get_id_no_origem())->get_arestas().size();
+    };
+
+    vector<Aresta*> fora = {};
+
+    // TODO: evitar duplicata
+    for (auto no : lista_adj) 
+        for (auto aresta : no->get_arestas()) 
+            fora.push_back(aresta);
+        
+    vector<Aresta*> dentro = {};
+    vector<Aresta*> candidatos = {}; 
+    dentro.reserve(fora.size());
+    candidatos.reserve(fora.size());
+    
+    while (fora.size() > 0) {
+
+        // Ordena as arestas fora por quem tem mais arestas conectadas
+        // FIXME: só considerar se tiver ligado a arestas dentro???
+        sort(fora.begin(), fora.end(), [this, grau_total](Aresta* a, Aresta* b) {
+            return grau_total(a) < grau_total(b);
+        });
+
+        // Calcular limite de valor selecionado
+        int melhor = grau_total(fora[0]);
+        int pior = grau_total(fora.back());
+        float limite = melhor - alpha * (melhor - pior);
+
+        // Calcular tamanho da amostra
+        int tamanho_amostra = 0;
+        for (Aresta* a : fora) {
+            if (grau_total(a) >= limite)
+                tamanho_amostra++;
+            else
+                break;
+        }
+        
+        // Dentro do limite da amostra, eleger uma aresta por sorteio e separar
+        int indice_eleito = rand() % tamanho_amostra;
+        Aresta* aresta_eleita = fora[indice_eleito];
+        dentro.push_back(std::move(aresta_eleita));
+        fora.erase(fora.begin() + indice_eleito);
+
+        int eleito_origem = aresta_eleita->get_id_no_origem();
+        int eleito_alvo = aresta_eleita->get_id_no_alvo();
+
+        // Remover arestas adjascentes ao eleito
+        fora.erase(
+            remove_if(fora.begin(), fora.end(), [eleito_origem, eleito_alvo](Aresta* aresta) {
+                
+                int origem = aresta->get_id_no_origem();
+                int alvo = aresta->get_id_no_alvo();
+                
+                return (eleito_origem == origem || eleito_origem == alvo
+                        || eleito_alvo == origem  || eleito_alvo == alvo);
+            }),
+            fora.end()
+        );
+    }
+
+    // TODO: Retornar novo grafo marcado, 
+    // um grafo só com essas arestas, 
+    // ou só as arestas em si
+
+    return nullptr;
+}
 
 // =======================================
 // Base
@@ -67,7 +152,7 @@ void Grafo::imprime_grafo() {
         cout << no->get_id() << "(" << no->get_peso() << ")" << ": ";
         for (Aresta *aresta : no->get_arestas())
         {
-            cout << "-> " << aresta->get_id_no_alvo() << "(" << aresta->get_peso() << ")";
+            cout << "-> " << (aresta->get_domina() ? "*" : " ") << aresta->get_id_no_alvo() << "(" << aresta->get_peso() << ")";
         }
         cout << endl;
     }

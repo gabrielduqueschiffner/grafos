@@ -57,6 +57,9 @@ public:
     void exportar_vector_para_arquivo(const vector<NoId> &v, const string &nome_arquivo);
     void exportar_metricas_para_arquivo(Grafo *g, const string &nome_arquivo);
 
+    // Guloso
+    Grafo* conjunto_dominante_arestas(float alpha);
+
     // Funções principais do trabalho
     vector<NoId> fecho_transitivo_direto(NoId id_no);                 // a
     vector<NoId> fecho_transitivo_indireto(NoId id_no);               // b
