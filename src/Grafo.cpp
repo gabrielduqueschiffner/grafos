@@ -54,33 +54,50 @@ Grafo* Grafo::conjunto_dominante_arestas(float alpha) {
 
         // Ordena as arestas fora, por quem tem maior grau total
 
-        // FIXME: só considerar se tiver ligado a arestas dentro???
-        sort(fora.begin(), fora.end(), [this, grau_total](Aresta* a, Aresta* b) { 
-            return grau_total(a) < grau_total(b);
-        });
+        int indice_eleito;
 
-        // Calcular o limite da seleção de candidatos: 
-        // pior valor de grau total aceitos
+        if (alpha == 0) {
 
-        int melhor = grau_total(fora[0]);
-        int pior = grau_total(fora.back());
-        float limite = melhor - alpha * (melhor - pior);
+            // Se for guloso normal, pegar o melhor
 
-        // Calcular quantas arestas serão incluída na amostra de candidatos
+            auto it = max_element(fora.begin(), fora.end(), [grau_total](Aresta* a, Aresta* b) {
+                return grau_total(a) < grau_total(b);
+            });
 
-        int tamanho_amostra = 0;
-        for (Aresta* a : fora) {
-            if (grau_total(a) >= limite)
-                tamanho_amostra++;
-            else
-                break;
+            indice_eleito = distance(fora.begin(), it);
+
+        } else {
+
+            // Se for aleatório, ordenar, calcular tamanho da amostra e sortear
+            
+            // FIXME: só considerar se tiver ligado a arestas dentro???
+            sort(fora.begin(), fora.end(), [grau_total](Aresta* a, Aresta* b) { 
+                return grau_total(a) < grau_total(b);
+            });
+
+            // Calcular o limite da seleção de candidatos: 
+            // pior valor de grau total aceitos
+            
+            int melhor = grau_total(fora[0]);
+            int pior = grau_total(fora.back());
+            float limite = melhor - alpha * (melhor - pior);
+            
+            // Calcular quantas arestas serão incluída na amostra de candidatos
+            
+            int tamanho_amostra = 0;
+            for (Aresta* a : fora) {
+                if (grau_total(a) >= limite)
+                    tamanho_amostra++;
+                else
+                    break;
+            }
+            
+            // Dentre os candidatos, escolher um aleatoriamente
+            indice_eleito = rand() % tamanho_amostra;
         }
         
-        // Dentre os candidatos, escolher um aleatoriamente
-
-        int indice_eleito = rand() % tamanho_amostra;
         Aresta* aresta_eleita = fora[indice_eleito];
-
+        
         // Mover aresta de acordo
         
         dentro.push_back(std::move(aresta_eleita));
