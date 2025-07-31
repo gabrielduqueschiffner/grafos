@@ -21,42 +21,53 @@ const int MENOS_INFINITO = numeric_limits<int>::min();
 Grafo* Grafo::conjunto_dominante_arestas(float alpha) {
 
     /*
-    guloso random usa uma folga
-    Separa todos dentro da folga
-    Escolhe dentre eles
+    Algoritmo guloso random para encontrar um conjunto dominante de arestas.
+    Ordena todas as arestas não consideradas ainda, e a partir dela, escolhe uma
+    entre as primeiras (sendo as N primeiras, a amostra de candidatos separados,
+    bastando sortear um valor de 0 a N para obter encontrar o candidato escolhido.
     */
 
     auto grau_total = [this](Aresta* aresta){
+
+        /* 
+        Função auxiliar que calcula o grau total de uma aresta
+        (a soma do grau de seus dois vértices) 
+        */
+        
         return encontra_no_por_id(aresta->get_id_no_alvo())->get_arestas().size() 
         + encontra_no_por_id(aresta->get_id_no_origem())->get_arestas().size();
     };
 
-    vector<Aresta*> fora = {};
+    // Vetores de arestas
 
-    // TODO: evitar duplicata
+    vector<Aresta*> fora = {};
     for (auto no : lista_adj) 
         for (auto aresta : no->get_arestas()) 
-            fora.push_back(aresta);
+            fora.push_back(aresta);              // TODO: falta evitar duplicata
         
     vector<Aresta*> dentro = {};
-    vector<Aresta*> candidatos = {}; 
     dentro.reserve(fora.size());
-    candidatos.reserve(fora.size());
     
+    // Até não haver mais nenhuma aresta a ser avaliada
+
     while (fora.size() > 0) {
 
-        // Ordena as arestas fora por quem tem mais arestas conectadas
+        // Ordena as arestas fora, por quem tem maior grau total
+
         // FIXME: só considerar se tiver ligado a arestas dentro???
-        sort(fora.begin(), fora.end(), [this, grau_total](Aresta* a, Aresta* b) {
+        sort(fora.begin(), fora.end(), [this, grau_total](Aresta* a, Aresta* b) { 
             return grau_total(a) < grau_total(b);
         });
 
-        // Calcular limite de valor selecionado
+        // Calcular o limite da seleção de candidatos: 
+        // pior valor de grau total aceitos
+
         int melhor = grau_total(fora[0]);
         int pior = grau_total(fora.back());
         float limite = melhor - alpha * (melhor - pior);
 
-        // Calcular tamanho da amostra
+        // Calcular quantas arestas serão incluída na amostra de candidatos
+
         int tamanho_amostra = 0;
         for (Aresta* a : fora) {
             if (grau_total(a) >= limite)
@@ -65,16 +76,21 @@ Grafo* Grafo::conjunto_dominante_arestas(float alpha) {
                 break;
         }
         
-        // Dentro do limite da amostra, eleger uma aresta por sorteio e separar
+        // Dentre os candidatos, escolher um aleatoriamente
+
         int indice_eleito = rand() % tamanho_amostra;
         Aresta* aresta_eleita = fora[indice_eleito];
+
+        // Mover aresta de acordo
+        
         dentro.push_back(std::move(aresta_eleita));
         fora.erase(fora.begin() + indice_eleito);
 
+        // Remover do conjunto fora as arestas adjascentes à aresta selecionada 
+        
         int eleito_origem = aresta_eleita->get_id_no_origem();
         int eleito_alvo = aresta_eleita->get_id_no_alvo();
 
-        // Remover arestas adjascentes ao eleito
         fora.erase(
             remove_if(fora.begin(), fora.end(), [eleito_origem, eleito_alvo](Aresta* aresta) {
                 
@@ -88,9 +104,10 @@ Grafo* Grafo::conjunto_dominante_arestas(float alpha) {
         );
     }
 
-    // TODO: Retornar novo grafo marcado, 
-    // um grafo só com essas arestas, 
-    // ou só as arestas em si
+    // TODO: oq retornar? 
+    // * novo grafo marcado, 
+    // * um grafo só com essas arestas, 
+    // * ou só as arestas em si
 
     return nullptr;
 }
