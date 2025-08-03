@@ -17,7 +17,7 @@ public:
         ifstream arquivoEntrada(pathfile);  
 
         if (!arquivoEntrada.is_open()) 
-            throw new runtime_error("Erro ao abrir o arquivo: ");
+            throw runtime_error("Erro ao abrir o arquivo: ");
 
         bool ponderado_aresta, ponderado_vertice, direcionado;
         int ordem;
@@ -26,7 +26,7 @@ public:
         // Lê a primeira linha
 
         if (!getline(arquivoEntrada, linha))
-            throw new runtime_error("Erro ao ler a primeira linha");
+            throw runtime_error("Erro ao ler a primeira linha");
 
         {
             istringstream iss(linha);
@@ -43,7 +43,7 @@ public:
         // Lê a segunda linha
 
         if (!getline(arquivoEntrada, linha)) 
-            throw new runtime_error("Erro ao ler a segunda linha");
+            throw runtime_error("Erro ao ler a segunda linha");
         
         istringstream iss(linha);
         iss >> ordem;
@@ -51,7 +51,7 @@ public:
         // verifica se é grafo nulo ou trivial
 
         if(ordem == 0 || ordem == 1) 
-             throw new runtime_error("Grafo nulo ou trivial não fazem sentido.");  //PORQUE N MANDA A MSG NO CONSOLE SÓ DA O ERROR???
+             throw runtime_error("Grafo nulo ou trivial não fazem sentido.");  //PORQUE N MANDA A MSG NO CONSOLE SÓ DA O ERROR???
           
 
         // Gerando a lista de nós do grafo e setando os seus pesos caso seja
@@ -59,7 +59,7 @@ public:
         for (int i = 0; i < ordem; i++) { // ordem declarada no escopo "cobre" a da classe
 
             if (!getline(arquivoEntrada, linha)) 
-                throw new runtime_error("Erro ao ler a linha" + to_string(i + 3));
+                throw runtime_error("Erro ao ler a linha" + to_string(i + 3));
                 
             istringstream iss(linha);
             NoId id_no;

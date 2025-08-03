@@ -17,7 +17,8 @@ Aresta::Aresta(NoId id_no_origem, NoId id_no_alvo, int peso, bool domina) {
 
 Aresta::~Aresta() {
     // Não há necessidade de liberar memória aqui, pois Aresta não aloca memória dinâmica
-    // A memória será liberada quando o objeto Aresta for destruído
+    // A memória será liberada quando o objeto Aresta for destruído pelo nó, que é destruído
+    // pelo Grafo
 }
 
 void Aresta::set_id_no_alvo(NoId id) {

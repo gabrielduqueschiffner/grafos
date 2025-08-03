@@ -18,175 +18,46 @@ const int MENOS_INFINITO = numeric_limits<int>::min();
 // Guloso
 // =======================================
 
-Grafo* Grafo::conjunto_dominante_arestas(float alpha) {
+// Grafo* Grafo::
 
-    /*
-    Algoritmo guloso random para encontrar um conjunto dominante de arestas.
-    Ordena todas as arestas não consideradas ainda, e a partir dela, escolhe uma
-    entre as primeiras (sendo as N primeiras, a amostra de candidatos separados,
-    bastando sortear um valor de 0 a N para obter encontrar o candidato escolhido.
-    */
+Grafo* Grafo::clone() {
     
+    Grafo* clone = new Grafo();
+    
+    for (No* no_origem : lista_adj) {
+        
+        No* copia_no_origem = new No(no_origem->get_id(), no_origem->get_peso());
+        
+        clone->adiciona_no(copia_no_origem);
 
-    /*FIXME: essa validacao faz sentido? ou nos casos de grafo direcionado, a gente ignora a direção e transforma em não direcionado adicionando as arestas de ida e volta?
-    Caso faça sentido,  a gente tem q converter o grafo direcionado em não direcionado, e talvez tbm na criação do grafo dominante etapa 4, setar de maneira fixa como não direcionado a resposta.
-    */
-    // Nao faz sentido em grafo direcionado o conjunto dominante de arestas
-    if (get_direcionado()) {
-  throw std::runtime_error("Só implementado para grafos não-direcionados.");
+        for (Aresta* aresta : no_origem->get_arestas()) {
+            
+            copia_no_origem->adiciona_aresta(new Aresta(
+                aresta->get_id_no_origem(),
+                aresta->get_id_no_alvo(), 
+                aresta->get_peso())
+            );
+        }
+    }
+
+    clone->set_ordem(ordem);
+    clone->set_direcionado(in_direcionado);
+    clone->set_ponderado_aresta(in_ponderado_aresta);
+    clone->set_ponderado_vertice(in_ponderado_vertice);
+
+    return clone;
 }
 
+int Grafo::contar_arestas_dominantes() {
 
-    // Validacao do alpha
-    if(alpha < 0 || alpha > 1) {
-        throw runtime_error("Erro: alpha deve estar entre 0 e 1.");
-    }
+    int qtd_arestas_dominantes = 0; 
 
-    // 1) cria vector que agrupa as arestas sem duplicatas 
+    for (No* no : lista_adj)
+        for (Aresta* aresta : no->get_arestas())
+            if (aresta->get_domina())
+                qtd_arestas_dominantes++;
 
-    vector<Aresta*> lista_sem_duplicatas;
-    for(auto no : lista_adj) {
-        for(auto a : no->get_arestas()){
-            // inclui na lista apenas origem < destino (garante ausência de duplicata em grafo nao direcionado)
-        if(a->get_id_no_origem() < a->get_id_no_alvo()) {
-                lista_sem_duplicatas.push_back(a);
-            }
-        }
-    }
-
-    //2)  Função auxiliar que calcula o grau total de uma aresta(a soma do grau de seus dois vértices) 
-    auto grau_total = [this](Aresta* aresta){
-
-        return encontra_no_por_id(aresta->get_id_no_alvo())->get_arestas().size() 
-        + encontra_no_por_id(aresta->get_id_no_origem())->get_arestas().size();
-    };
-
-    // Vetores de arestas
-
-    vector<Aresta*> fora = lista_sem_duplicatas; // Arestas fora do conjunto dominante
-
- 
-    vector<Aresta*> dentro = {};
-    dentro.reserve(fora.size());
-    
-
-
-   // 3) loop ate nao haver mais arestas nao dominadas (nao ter mais aresta a ser avaliada)
-    while (fora.size() > 0) {
-
-        // Ordena as arestas "fora" do conjunto dominante, por quem tem maior grau total (heuristica de ordenacao)
-
-        int indice_eleito;
-
-        if (alpha == 0) {
-
-            // Se for guloso normal, pegar o melhor (escolha determinística: aresta com maior grau)
-
-            auto it = max_element(fora.begin(), fora.end(), [grau_total](Aresta* a, Aresta* b) {
-                return grau_total(a) < grau_total(b);
-            });
-
-            indice_eleito = distance(fora.begin(), it);
-
-        } else {
-
-            // Se for guloso randomizado (aleatório), ordenar, calcular tamanho da amostra e sortear
-            
-            // FIXME: só considerar se tiver ligado a arestas dentro???
-            //RESP FIXME: esta funcionando aparentemente, n entendi a duvida. favor apagar o comentario do return dentro do sort, se vc validou a minha modificacao.
-
-            // amostragem dos melhores com randomização
-            sort(fora.begin(), fora.end(), [grau_total](Aresta* a, Aresta* b) { 
-                /* return grau_total(a) < grau_total(b); */
-                return grau_total(a) > grau_total(b); // Maior grau total primeiro (heurística de ordenação decrescente), ja que esta sem o max_element
-            });
-
-            // Calcular o limite da seleção de candidatos: 
-            // pior valor de grau total aceitos
-            
-         
-             int melhor = grau_total(fora.front()); // Melhor valor de grau total (primeiro da lista ordenada)
-            int pior = grau_total(fora.back()); // Pior valor de grau total (último da lista ordenada)
-            float limite = melhor - alpha * (melhor - pior); // Limite de grau total para seleção de candidatos
-            
-
-
-
-            // Calcular quantas arestas serão incluída na amostra de candidatos
-            
-            int tamanho_amostra = 0;
-            for (Aresta* a : fora) {
-                if (grau_total(a) >= limite)
-                    tamanho_amostra++;
-                else
-                    break;
-            }
-            
-            // Dentre os candidatos, escolher um aleatoriamente
-            indice_eleito = rand() % tamanho_amostra;
-        }
-        
-        Aresta* aresta_eleita = fora[indice_eleito];
-        
-        // Mover aresta de acordo
-        //FIXME: nao entendi pq o move aqui, sem ele n funciona da mesma forma?
-        // Gabriel -> nao comprendi essa parte do algoritmo, pq o move? sem ele n funciona da mesma forma?
-        dentro.push_back(move(aresta_eleita));
-        fora.erase(fora.begin() + indice_eleito);
-
-        // Remover do conjunto fora as arestas adjascentes à aresta selecionada (a dentro ou fora)
-        int eleito_origem = aresta_eleita->get_id_no_origem();
-        int eleito_alvo = aresta_eleita->get_id_no_alvo();
-
-        fora.erase(
-            remove_if(fora.begin(), fora.end(), [eleito_origem, eleito_alvo](Aresta* aresta) {
-                
-                int origem = aresta->get_id_no_origem();
-                int alvo = aresta->get_id_no_alvo();
-                
-                return (eleito_origem == origem || eleito_origem == alvo
-                        || eleito_alvo == origem  || eleito_alvo == alvo);
-            }),
-            fora.end()
-        );
-
-   
-
-
-    }
-
-    //4) Constroi novo grafo que tem tem apenas as arestas dominantes
-
-    // Seta as flags do novo grafo
-    Grafo* grafo_dominante = new Grafo();
-    grafo_dominante->set_direcionado(get_direcionado());  //FIXME: setar sempre como não direcionado? faz mais sentindo sempre ser nao direcionado, oq acha?
-    grafo_dominante->set_ponderado_aresta(get_ponderado_aresta());
-    grafo_dominante->set_ponderado_vertice(get_ponderado_vertice());
-
-    // copia os nós do grafo original ao novo grafo
-
-   for(auto no :lista_adj) {
-      NoId id_no = no->get_id();
-      int peso_no = no->get_peso();
-        grafo_dominante->adiciona_no(new No(id_no, peso_no));
-    }
-
-    // adiciona as arestas do conjunto dominante ao novo grafo;
-    for(auto a : dentro){
-        NoId id_origem = a->get_id_no_origem();
-        NoId id_alvo = a->get_id_no_alvo();
-        int peso = a->get_peso();
-
-        grafo_dominante->adiciona_aresta(id_origem, id_alvo, peso);
-    }
-    // TODO: CONCLUIDO!!! Verificar os comentarios e modificacoes e FIXME, e depois de validado apagar por favor
-    //oq retornar? 
-    // * novo grafo marcado, 
-    // * um grafo só com essas arestas, 
-    // * ou só as arestas em si              
-
-
-    return grafo_dominante;
+    return qtd_arestas_dominantes / 2;
 }
 
 // =======================================
@@ -195,32 +66,39 @@ Grafo* Grafo::conjunto_dominante_arestas(float alpha) {
 
 Grafo::Grafo() {}
 
-Grafo::~Grafo() {}
+Grafo::~Grafo() {
+    for (No* no : lista_adj)
+        delete no;
+}
 
 void Grafo::adiciona_no(No* no) {
-
     lista_adj.push_back(no);
     ordem++;
 }
 
 void Grafo::adiciona_aresta(NoId id_origem, NoId id_alvo, int peso) {
     
+    /*
+    Adiciona uma nova aresta ao grafo, criando a partir dos parâmetros, uma 
+    indo do origem pro alvo, e se for grafo não direcionado, uma indo do alvo
+    até a origem.
+    */
+
     No *no_origem = encontra_no_por_id(id_origem);
+
     if (!no_origem)
-    {
-        cerr << "Aviso: nó origem '" << id_origem << "' não existe." << endl;
-        return;
-    }
-    // no_origem.adiciona_aresta já verifica duplicata dentro de No
+        throw runtime_error("Nó origem não existe.");
+
     no_origem->adiciona_aresta(new Aresta(id_origem, id_alvo, peso));
 
     if (!get_direcionado())
     {
         No *no_destino = encontra_no_por_id(id_alvo);
-        if (no_destino)
-        {
-            no_destino->adiciona_aresta(new Aresta(id_alvo, id_origem, peso));
-        }
+
+        if (!no_destino)
+            throw runtime_error("Nó alvo não existe.");
+        
+        no_destino->adiciona_aresta(new Aresta(id_alvo, id_origem, peso));
     }
 }
 
@@ -228,13 +106,19 @@ void Grafo::adiciona_aresta(NoId id_origem, NoId id_alvo, int peso) {
 // Impressão
 // =======================================
 
-No * Grafo::encontra_no_por_id(NoId id) const {
+No* Grafo::encontra_no_por_id(NoId id) {
 
-    for (No *no : lista_adj)
-            if (no->get_id() == id)
-                return no;
-    
-    return nullptr;
+    // Mudar para que todo grafo sempre tenha os dois mapas
+
+    auto mapa_id_index = get_mapa_id_index();
+
+    try {
+        return lista_adj[mapa_id_index.at(id)];
+    }
+
+    catch (out_of_range ex) {
+        return nullptr;
+    }
 }
 
 void Grafo::imprime_grafo() {
@@ -366,8 +250,6 @@ void Grafo::exportar_metricas_para_arquivo(Grafo *g, const string& nome_arquivo)
     arquivo.close();
     cout << "Métricas exportadas em " << nome_arquivo << endl;
 }
-
-
 
 void Grafo::exportar_grafo_para_arquivo_csacademy(Grafo *g, const string &nome_arquivo) {
     

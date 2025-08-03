@@ -15,7 +15,7 @@ No::No(NoId id_no, int peso) {
 
 No::~No() {
     for (Aresta* aresta : arestas) {
-        delete aresta; // Libera a memória alocada para as arestas
+        delete aresta;
     }
 }
 

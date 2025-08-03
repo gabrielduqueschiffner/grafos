@@ -42,7 +42,10 @@ public:
     int get_ordem();
     vector<No *> get_lista_adj();
 
-    No *encontra_no_por_id(NoId id) const; // Busca linear por ID
+    unordered_map<int, NoId> get_mapa_index_id();
+    unordered_map<NoId, int> get_mapa_id_index();
+
+    No *encontra_no_por_id(NoId id); // Busca linear por ID
     
     void adiciona_no(No* no);
     void adiciona_aresta(NoId id_no_origem, NoId id_no_alvo, int peso=0);
@@ -58,7 +61,10 @@ public:
     void exportar_metricas_para_arquivo(Grafo *g, const string &nome_arquivo);
 
     // Guloso
-    Grafo* conjunto_dominante_arestas(float alpha);
+    Grafo* guloso_random_cda(float alfa);
+    Grafo* guloso_cda();
+    Grafo* clone();
+    int contar_arestas_dominantes();
 
     // Funções principais do trabalho
     vector<NoId> fecho_transitivo_direto(NoId id_no);                 // a
@@ -105,8 +111,7 @@ private:
                                      vector<NoId> &resultado,
                                      const unordered_map<NoId, int> &mapa_id_para_indice);
 
-    unordered_map<int, NoId> get_mapa_index_id();
-    unordered_map<NoId, int> get_mapa_id_index();
+
     void calcular_matrizes_floyd(vector<vector<int>>& dist, vector<vector<int>>& prox);
     vector<int> get_excentricidades();
     Grafo* gera_grafo_transposto();
