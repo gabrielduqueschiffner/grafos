@@ -64,7 +64,6 @@ public:
     Grafo* guloso_random_cda(float alfa);
     Grafo* guloso_cda();
     Grafo* clone();
-    int contar_arestas_dominantes();
 
     // Funções principais do trabalho
     vector<NoId> fecho_transitivo_direto(NoId id_no);                 // a

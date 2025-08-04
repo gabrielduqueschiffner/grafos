@@ -48,18 +48,6 @@ Grafo* Grafo::clone() {
     return clone;
 }
 
-int Grafo::contar_arestas_dominantes() {
-
-    int qtd_arestas_dominantes = 0; 
-
-    for (No* no : lista_adj)
-        for (Aresta* aresta : no->get_arestas())
-            if (aresta->get_domina())
-                qtd_arestas_dominantes++;
-
-    return qtd_arestas_dominantes / 2;
-}
-
 // =======================================
 // Base
 // =======================================

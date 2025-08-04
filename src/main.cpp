@@ -1,14 +1,10 @@
 #include <cstdlib>
 #include <iostream>
 #include <stdexcept>
-// #include "../include/InterfaceConsole.h"
+
 #include "../include/LeitorGrafo.h"
 #include "../include/types.h"
 #include "../include/Guloso.h"
-
-//#include "../include/Grafo.h"
-//#include "../include/Aresta.h"
-//#include "../include/No.h"
 
 using namespace std;
 int main(int argc, char *argv[])
@@ -22,16 +18,14 @@ int main(int argc, char *argv[])
     cout << endl;
     grafo->imprime_grafo();
 
-    cout << "=========================" << endl;
+    // cout << "=========================" << endl;
     
-    Guloso guloso(0.5);
+    // Guloso guloso(0.5);
 
-    Grafo* grafo_dominante = guloso.conjunto_dominante_arestas(grafo);
-    grafo_dominante->imprime_grafo();
+    // Grafo* grafo_dominante = guloso.conjunto_dominante_arestas(grafo);
+    // grafo_dominante->imprime_grafo();
 
-    cout << "Arestas dominantes: " << grafo_dominante->contar_arestas_dominantes() << endl;
-
-    delete grafo_dominante;
+    // delete grafo_dominante;
     delete grafo;
 
     // InterfaceConsole* gerenciador = new InterfaceConsole(grafo);
