@@ -61,8 +61,9 @@ public:
     void exportar_metricas_para_arquivo(Grafo *g, const string &nome_arquivo);
 
     // Guloso
-    Grafo* guloso_random_cda(float alfa);
-    Grafo* guloso_cda();
+    // FIXME: Ver se é necessário, acho q ta destaulizado
+   // Grafo* guloso_random_cda(float alfa);
+   // Grafo* guloso_cda();
     Grafo* clone();
 
     // Funções principais do trabalho
