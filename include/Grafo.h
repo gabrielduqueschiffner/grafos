@@ -34,7 +34,6 @@ public:
     void set_direcionado(int direcao);
     void set_ponderado_aresta(int ponderado);
     void set_ponderado_vertice(int ponderado);
-    void set_ordem(int ordem);
 
     int get_direcionado();
     int get_ponderado_aresta();

@@ -1,36 +1,32 @@
 
-#include <random>
-#include <cstdlib>
 #include <algorithm>
 #include <cmath>
+#include <cstdlib>
+#include <numeric>
+#include <random>
 #include <stdexcept>
-#include <unordered_map>
+#include <string>
 #include <vector>
 
-#include "../include/Guloso.h"
 #include "../include/Grafo.h"
-#include "../include/Aresta.h"
+#include "../include/Guloso.h"
 #include "../include/No.h"
 #include "../include/types.h"
 
 using namespace std;
 
-Guloso::Guloso(Grafo *grafo, int seed)
-{
+Guloso::Guloso(Grafo *grafo, int seed) {
 
-    cout << "[DEBUG] Construtor simples: seed=" << seed << "\n";
-    // Só faz aletório, seed definida
+    /* Inicializador simples para realização apenas do guloso não reativo */
 
     this->grafo = grafo;
 
-    if (seed == -1)
-    {
+    if (seed == -1) {
 
         random_device rd;
         this->aleatorio = new Aleatorio(rd());
-    }
-    else
-    {
+
+    } else {
 
         this->aleatorio = new Aleatorio(seed);
     }
@@ -40,10 +36,15 @@ Guloso::Guloso(Grafo *grafo, int seed)
     this->k_bloco = -1;
 }
 
-Guloso::Guloso(Grafo *grafo, vector<float> alfas, int max_iter, int k_bloco, int seed)
-{
+Guloso::Guloso(
+    Grafo *grafo, vector<float> alfas, int max_iter, int k_bloco, int seed
+) {
 
-    //
+    /* Inicializador para realizar guloso reativo */
+    
+    if (alfas.empty()) 
+        throw runtime_error("vetor de alfas vazio.");
+
     this->grafo = grafo;
     this->alfas = alfas;
     this->max_iter = max_iter;
@@ -51,288 +52,232 @@ Guloso::Guloso(Grafo *grafo, vector<float> alfas, int max_iter, int k_bloco, int
     this->melhor_solucao = nullptr;
     this->delta = 1.0f;
 
-    int m = alfas.size(); // Número de alfas
+    int tam_alfa = alfas.size(); // Número de alfas
+    
+    probs_alfas.assign(tam_alfa, 1.0f / tam_alfa);     
+    qualidade_alfas.assign(tam_alfa, 0.0f);         
+    qualidade_relat_alfas.assign(tam_alfa, 0.0f); 
+    qtd_alfas.assign(tam_alfa, 0.0f);          
+    qualidade_media = 0.0f; // FIXME: Não usado
 
-    if (m == 0)
-    {
-        throw runtime_error("CONSTRUTOR GULOSO ERROR: vetor de alfas vazio.");
-    }
-    probs_alfas.assign(m, 1.0f / m);    // Inicializa com probabilidades uniformes
-    qualid_alfas.assign(m, 0.0f);       // Inicializa qualidades absolutas
-    qualid_relat_alfas.assign(m, 0.0f); // Inicializa qualidades relativas
-    quant_alfas.assign(m, 0.0f);        // Inicializa contagem de soluções encontradas
-    qualid_media = 0.0f;                // Inicializa qualidade média  FIXME: devo usar quando??????
-
-    // Inicializa o gerador de números aleatórios
-    // Se seed for -1, usa random_device para gerar um seed aleatório
-    // Caso contrário, usa o seed fornecido
-    if (seed == -1)
-    {
-
+    // Valor padrão -1 pra seed, sinaliza que não foi passada uma seed
+    if (seed == -1) {
         random_device rd;
-        this->aleatorio = new Aleatorio(rd());
+        seed = rd();
     }
-    else
-    {
-
-        this->aleatorio = new Aleatorio(seed);
-    }
-
-    cout << "[DEBUG] Construtor completo: alfas.size()=" << alfas.size()
-         << " max_iter=" << max_iter << " k_bloco=" << k_bloco
-         << " seed=" << seed << "\n";
+    
+    this->aleatorio = new Aleatorio(seed);
 }
 
-int Guloso::qualidade_da_solucao(Grafo *solucao)
-{
+Guloso::~Guloso() {
+    
+    delete aleatorio;
+    
+    // FIXME: quem desaloca isso?
+    // if (melhor_solucao) 
+    //     delete melhor_solucao;
+
+    // A memória do ponteiro "grafo" é de propriedade externa
+    // TODO: Deveria ser recebido e passado invés de guardado?
+}
+
+int Guloso::qualidade_da_solucao(Grafo *solucao) {
+
     /*
     Assume que arestas estão duplicadas, e ambas foram marcadas como
-    dominantes.
+    dominantes. Não é válido para grafos direcionados.
     */
 
-    // conta todas as arestas nos vetores de adjacencia
+    if (solucao->get_direcionado())
+        throw runtime_error("Não é valido para grafos direcionados");
+
+    // Soma de arestas dentro da solução
+    
     int qtd_arestas_dominantes = 0;
     for (No *no : solucao->get_lista_adj())
-    {
-        qtd_arestas_dominantes += int(no->get_arestas().size());
-    }
+        for (Aresta* aresta : no->get_arestas())
+            if (aresta->get_domina())
+                qtd_arestas_dominantes++;    
 
-    if (!solucao->get_direcionado())
-        qtd_arestas_dominantes /= 2;
-    // Se não for direcionado, cada aresta é contada duas vezes
-
-    return qtd_arestas_dominantes;
+    return qtd_arestas_dominantes / 2;
 }
 
-void Guloso::atualizar_probs()
-{
+void Guloso::atualizar_probs() {
+    
     /* Atualiza as probabilidades de cada alfa, baseado na qualidade média
     das soluções encontradas até o momento. */
-    int m = int(alfas.size());
 
-    // 1) calcular médias mi = qualid_alfas[i] / quant_alfas[i]
-    for (int i = 0; i < m; i++)
-    {
-        if (quant_alfas[i] > 0)
-        {
-            qualid_relat_alfas[i] = qualid_alfas[i] / float(quant_alfas[i]);
-        }
+    int tam_alfas = static_cast<int>(alfas.size());
+
+    const float INFINITO = numeric_limits<float>::infinity();
+
+    // FIXME: Setar como infinito mata a exploração?
+    for (int i = 0; i < tam_alfas; i++)
+        qualidade_relat_alfas[i] = qtd_alfas[i] > 0 ? qualidade_alfas[i] / qtd_alfas[i] : INFINITO;
+
+    // 2) encontrar F*, melhor qualidade global
+    int f_estrela = (melhor_solucao != nullptr) ? qualidade_da_solucao(melhor_solucao) : 0; 
+
+    // 3) calcular qi
+    for (int i = 0; i < tam_alfas; i++) {
+
+        float m_i = qualidade_relat_alfas[i]; // m_i é a qualidade relativa do alfa i
+        
+        if (m_i > 0 && m_i != INFINITO)
+            qualidade_relat_alfas[i] = pow(f_estrela / qualidade_relat_alfas[i], delta);
         else
-        {
-            qualid_relat_alfas[i] = numeric_limits<float>::infinity(); // ou algum valor padrão
-        }
-    }
-    // 2) encontrar F* = melhor qualidade entre todas as alfas (melhor solucao global)
-    int F_Estrela;
-
-    if (melhor_solucao != nullptr)
-    {
-        F_Estrela = qualidade_da_solucao(melhor_solucao); // ou algum valor padrão se melhor_solucao for nulo
-    }
-    else
-    {
-        F_Estrela = 0; // ou algum valor padrão se não houver melhor solução
+            qualidade_relat_alfas[i] = 0;
     }
 
-    // 3) calcular qi = (F*/Mi)^delta
-    for (int i = 0; i < m; i++)
-    {
-        float Mi = qualid_relat_alfas[i]; // Mi é a qualidade relativa do alfa i
-        if ((Mi > 0) && (Mi < numeric_limits<float>::infinity()))
-        {
-            qualid_relat_alfas[i] = pow(F_Estrela / qualid_relat_alfas[i], delta);
-        }
-        else
-        {
-            qualid_relat_alfas[i] = 0.0f; // ou algum valor padrão
+    // 4) média global de m_i
+    
+    float soma = 0;
+    int conatgem = 0;
+    for (int i = 0; i < tam_alfas; ++i) {
+        if (qtd_alfas[i] > 0) {
+            soma += (qualidade_alfas[i] / float(qtd_alfas[i]));
+            ++conatgem;
         }
     }
 
-    // 4) média global de Mi
-    {
-        float soma = 0;
-        int cnt = 0;
-        for (int i = 0; i < m; ++i)
-        {
-            if (quant_alfas[i] > 0)
-            {
-                soma += (qualid_alfas[i] / float(quant_alfas[i]));
-                ++cnt;
-            }
-        }
-        if (cnt > 0)
-        {
-            qualid_media = soma / cnt; // Média global de Mi
-        }
-        else
-        {
-            qualid_media = 0.0f; // Se não houver soluções, média é zero
-        }
-    }
+    qualidade_media = (conatgem > 0) ? (soma / conatgem) : 0; 
 
     // 5) Normalizar qi para obter probabilidades (probs_alfas)
-    float soma_qi = accumulate(qualid_relat_alfas.begin(), qualid_relat_alfas.end(), 0.0f);
-    if (soma_qi > 0)
-    {
-        for (int i = 0; i < m; ++i)
-        {
-            probs_alfas[i] = qualid_relat_alfas[i] / soma_qi;
-        }
-    }
-    else
-    {
-        // Se a soma for zero, distribuir probabilidades uniformemente
-        for (int i = 0; i < m; i++)
-        {
-            probs_alfas[i] = 1.0f / m;
-        }
+    
+    float soma_qi = accumulate(
+        qualidade_relat_alfas.begin(), 
+        qualidade_relat_alfas.end(), 
+        0.0f
+    );
+
+    
+    if (soma_qi > 0) {
+        
+        for (int i = 0; i < tam_alfas; ++i) 
+            probs_alfas[i] = qualidade_relat_alfas[i] / soma_qi;
+        
+    } else {
+
+        // Se a soma for zero, setar probabilidades uniformes
+        for (int i = 0; i < tam_alfas; i++)
+            probs_alfas[i] = 1.0f / tam_alfas;
+        
     }
 
-    // 6) Resetar qualid_alfas e quant_alfas (acumuladores) para a próxima rodada(bloco)
-    fill(qualid_alfas.begin(), qualid_alfas.end(), 0.0f);
-    fill(quant_alfas.begin(), quant_alfas.end(), 0.0f);
+    // Resetar variáveis
+    
+    fill(qualidade_alfas.begin(), qualidade_alfas.end(), 0.0f);
+    fill(qtd_alfas.begin(), qtd_alfas.end(), 0.0f);
 }
 
-void Guloso::atualizar_melhor_solucao(Grafo *solucao)
-{
-    /* Atualiza a melhor solução encontrada, se a nova solução for melhor. */
+bool Guloso::atualizar_melhor_solucao(Grafo *solucao) {
 
-    int qualidade_nova = qualidade_da_solucao(solucao);
-    // se for a primeira solução, ou se for melhor que a melhor solução atual
-    if (!melhor_solucao || qualidade_nova < qualidade_da_solucao(melhor_solucao))
-    {
-        // atualiza a melhor solucao
-        delete melhor_solucao;             // libera memória da solução anterior
-        melhor_solucao = solucao->clone(); // Clona a solução para manter a original intacta
+    /* Atualiza a melhor solução encontrada, caso a nova solução for melhor. Faz
+    isso ao guardar um clone da solução. */
+
+    if (!melhor_solucao || qualidade_da_solucao(solucao) > qualidade_da_solucao(melhor_solucao)) {
+        
+        if (melhor_solucao)
+            delete melhor_solucao; 
+        
+        melhor_solucao = solucao->clone();
+        
+        return true;
     }
-    delete solucao; // Libera a memória da solução temporária
+
+    return false;
 }
 
-void Guloso::atualizar_qualidades(int indice_alfa, Grafo *solucao)
-{
+void Guloso::atualizar_qualidades(int indice_alfa, Grafo *solucao) {
+
     /* Atualiza as qualidades relativas e absolutas de cada alfa, baseado na
     qualidade da solução encontrada. */
 
     int qualidade = qualidade_da_solucao(solucao);
-    // Atualiza a qualidade absoluta
-    qualid_alfas[indice_alfa] += qualidade;
-    // Atualiza a quantidade de soluções encontradas com esse alfa
-    quant_alfas[indice_alfa] += 1;
-
-    // DELETO AQUI TBM? ESTAVA DANDO PROBLEMA DE MEMORIA
-    //   delete solucao; // Libera a memória da solução temporária
+    qualidade_alfas[indice_alfa] += qualidade;
+    qtd_alfas[indice_alfa] += 1;
 }
 
-int Guloso::selecionar_alfa()
-{
+int Guloso::selecionar_alfa() {
+
     /* Seleciona um alfa baseado nas probabilidades atualizadas. */
 
-    int m = int(probs_alfas.size());
+    float soma = accumulate(probs_alfas.begin(), probs_alfas.end(), 0.0f);
 
-    float roleta = aleatorio->gerar_inteiro(100) / 100.0f; // Gera um número aleatório entre 0 e 1
+    if (fabs(soma - 1.0f) > 1e-6f)
+        throw runtime_error("Soma do array de probs é diferente de 1.");
+
+    int tam_probs = static_cast<int>(probs_alfas.size());
+
+    float soma_minima = aleatorio->gerar_float(1);
     float soma_probs = 0.0f;
 
-    for (int i = 0; i < m; ++i)
-    {
+    for (int i = 0; i < tam_probs; ++i) {
         soma_probs += probs_alfas[i]; // Soma as probabilidades acumuladas
 
         // Verifica se o número aleatório está dentro do intervalo acumulado
-        if (roleta <= soma_probs)
+        if (soma_minima <= soma_probs)
             return i; // Retorna o índice do alfa selecionado
     }
 
-    // Se não encontrou, retornar o último índice (deve ser o caso de alfas vazios)
-    // Isso pode acontecer se todas as probabilidades forem zero, o que não deveria ocorrer
-    // se a lógica de atualização de probabilidades estiver correta.
-    cout << "Aviso: Nenhum alfa selecionado, retornando último índice." << endl;
-
-    return m - 1; // Retorna o último índice
+    throw runtime_error("Nenhum alfa selecionado.");
 }
 
-Grafo *Guloso::rodar_reativo()
-{
-
-    // melhor_solucao = nullptr; // Reseta a melhor solução antes de começar
-    //  Me parece desnecessário, pois já é inicializado no construtor
-    //  mas vou deixar comentado para não perder a referência
-
-    cout << "[DEBUG] Entrou em rodar_reativo: max_iter="
-         << max_iter << ", k_bloco=" << k_bloco
-         << ", alfas.size()=" << alfas.size()
-         << ", probs_alfas.size()=" << probs_alfas.size()
-         << "\n";
+Grafo* Guloso::rodar_reativo() {
 
     if (alfas.empty())
-    {
-        throw runtime_error("[ERROR] vetor de alfas vazio! Não posso rodar reativo.");
-        return nullptr;
-    }
+        throw runtime_error("Vetor de alfas vazio! Não posso rodar reativo.");
 
     if (probs_alfas.size() != alfas.size())
-    {
-        cerr << "[ERROR] probs_alfas.size()=" << probs_alfas.size()
-             << " mas alfas.size()=" << alfas.size() << "\n";
+        throw runtime_error("Vetores alfas e probs_alfas com tamanhos inconsistentes.");
 
-        return nullptr;
-    }
+    Grafo* solucao = nullptr;
 
-    for (int i = 0; i < max_iter; ++i)
-    {
-        cout << "[DEBUG - FUNCREATIVA]iteração " << i << "\n";
-        // recalcula probabilidades a cada k_bloco iterações
-        if (i > 0 && i % k_bloco == 0)
-        {
-            cout << "[DEBUG] chamando atualizar_probs()\n";
+    for (int i = 0; i < max_iter; ++i) {
+        
+        if ((i != 0) && (i % k_bloco == 0)) {
+
             atualizar_probs();
+        
+            if ((i % k_bloco) == 0) {
+                cout << "Iteração " << i << "\n";
+                for (size_t j = 0; j < alfas.size(); ++j) {
+                    cout << "  alfa[" << j << "]=" << alfas[j]
+                        << " prob=" << probs_alfas[j]
+                        << " qualidade_media=" << (qtd_alfas[j] > 0 ? qualidade_alfas[j] / qtd_alfas[j] : 0)
+                        << "\n";
+                }
+                cout << "Melhor qualidade global: " << qualidade_da_solucao(melhor_solucao) << "\n\n";
+            }
         }
 
-        // escolhe a segundo probs_alfa
-        int indice_alfa = selecionar_alfa();
-        float alfa = alfas[indice_alfa];
+        int indice_alfa_eleito = selecionar_alfa();
+        float alfa_eleito = alfas[indice_alfa_eleito];
 
-        cout << "[DEBUG] selecionei indice_alfa=" << indice_alfa
-             << " valor=" << alfas[indice_alfa] << "\n";
-
-        cout << "[DEBUG] chamando conjunto_dominante_arestas...\n";
-        Grafo *solucao = conjunto_dominante_arestas(alfa);
+        solucao = conjunto_dominante_arestas(alfa_eleito);
 
         if (!solucao)
-        {
-            throw runtime_error("[ERROR] conjunto_dominante_arestas retornou nullptr");
-            break;
-        }
+            throw runtime_error("Não foi retornada uma solução.");
+        
+        atualizar_qualidades(indice_alfa_eleito, solucao);
 
-        cout << "[DEBUG] solução gerada com sucesso, agora atualizando qualidades\n";
-        // 1) acumula a qualidade da solução
-
-        atualizar_qualidades(indice_alfa, solucao);
-        cout << "[DEBUG] qualidades atualizadas, agora atualizando melhor solução\n";
-        // 2) tambem verifica se foi a melhor global
-        // precisa de um clone , porque a solucao é temporária e ja foi deletada o ponteiro
-
-        // Grafo* solucao_clone = solucao->clone();
+        // Só liberar memória caso a posse não tenha sido transferida
         atualizar_melhor_solucao(solucao);
-        cout << "[DEBUG] melhor solução potencialmente atualizada\n";
     }
 
-    return melhor_solucao;
+    return solucao;
 }
 
-Grafo *Guloso::conjunto_dominante_arestas(float alfa)
-{
+Grafo* Guloso::conjunto_dominante_arestas(float alfa) {
 
     /*
     Algoritmo guloso random para encontrar um conjunto dominante de arestas.
-    Ordena todas as arestas não consideradas ainda, e a partir dela, escolhe uma
-    entre as primeiras (sendo as N primeiras, a amostra de candidatos separados,
-    bastando sortear um valor de 0 a N para obter encontrar o candidato escolhido.
+    Ordena todas as arestas que ainda não foram consideradas de acordo com a sua
+    qualidade dfinida pela heurística, e em seguida escolhe uma entre as 
+    melhores (entre as N primeiras).
     */
 
-    cout << "[DEBUG conj] **ENTRADA** conjunto_dominante_arestas(alfa="
-         << alfa << ")\n";
-
-    if (grafo->get_direcionado())
-    {
+    if (grafo->get_direcionado()) {
         throw std::runtime_error(
             "Conjunto dominante de arestas não se aplica para grafo direcionado.");
     }
@@ -340,82 +285,62 @@ Grafo *Guloso::conjunto_dominante_arestas(float alfa)
     if (alfa < 0 || alfa > 1)
         throw runtime_error("Erro: alfa deve estar entre 0 e 1.");
 
-    cout << "[DEBUG conj] 1) antes de clonar grafo\n";
-    Grafo *grafo_marcado = grafo->clone();
-    cout << "[DEBUG conj] 1) depois de clonar, nós = "
-         << grafo_marcado->get_lista_adj().size() << "\n";
-
-    auto mapa_id_index = grafo_marcado->get_mapa_id_index();
-
+    // Aloca um clone no ponteiro passado
+    Grafo* solucao = grafo->clone();
+    
     // Copiar arestas sem repetição
 
-    vector<Aresta *> fora = {};
+    vector<Aresta*> fora = {};
+    vector<Aresta*> dentro = {};
 
-    cout << "[DEBUG conj] 2) coletando arestas em 'fora'\n";
+    auto mapa_id_index = solucao->get_mapa_id_index();
 
-    for (No *no : grafo_marcado->get_lista_adj())
-    {
+    for (No *no : solucao->get_lista_adj()) {
 
         int index_origem = mapa_id_index[no->get_id()];
         for (Aresta *aresta : no->get_arestas())
-            if (index_origem <= mapa_id_index[aresta->get_id_no_alvo()])
-                fora.push_back(aresta);
+        if (index_origem <= mapa_id_index[aresta->get_id_no_alvo()])
+            fora.push_back(aresta);
     }
-    cout << "[DEBUG conj] 2) fora.size() = " << fora.size() << "\n";
-    // Arestas fora e dentro do conjunto dominante
-
-    vector<Aresta *> dentro = {};
+    
     dentro.reserve(fora.size());
 
     // Decidindo heurística e armazenando em variável
 
-    auto heuristica = get_heuritica(alfa);
+    auto heuristica = get_heuristica(alfa);
 
-    // Enquanto não houver arestas a serem avaliadas, selecionar arestas
+    // Enquanto não houver arestas a serem avaliadas selecionar e incluir na solução
 
-    int passo = 0;
-    cout << "[DEBUG conj] 3) entrando no while(fora)\n";
-    while (fora.size() > 0)
-    {
-        cout << "[DEBUG conj]   loop passo=" << passo++
-             << " fora.size()=" << fora.size() << "\n";
+    while (fora.size() > 0) {
 
-        int indice_eleito = heuristica(dentro, fora);
-
-        cout << "[DEBUG conj]    eleito idx=" << indice_eleito
-             << " em [0.." << fora.size() - 1 << "]\n";
-
+        int indice_eleito = heuristica(fora);
         Aresta *aresta_eleita = fora[indice_eleito];
 
-        // Marcar arestas dos dois sentidos
+        // Marcar como dominante a aresta indo, e a resta voltando
 
         aresta_eleita->set_domina(true);
-        No *no_alvo = grafo_marcado->encontra_no_por_id(aresta_eleita->get_id_no_alvo());
+        No *no_alvo = solucao->encontra_no_por_id(aresta_eleita->get_id_no_alvo());
 
         for (Aresta *aresta_alvo : no_alvo->get_arestas())
-            if (aresta_alvo->get_id_no_alvo() == aresta_eleita->get_id_no_origem())
-                aresta_alvo->set_domina(true);
+        if (aresta_alvo->get_id_no_alvo() == aresta_eleita->get_id_no_origem())
+            aresta_alvo->set_domina(true);
 
         // Remover do conjunto "fora" as arestas adjascentes à aresta selecionada
 
         int eleito_origem = aresta_eleita->get_id_no_origem();
         int eleito_alvo = aresta_eleita->get_id_no_alvo();
 
-        // Mover aresta de acordo
-
         dentro.push_back(aresta_eleita);
 
-        vector<Aresta *> arestas_restantes;
+        vector<Aresta*> arestas_restantes;
 
-        for (Aresta *aresta : fora)
-        {
+        for (Aresta *aresta : fora) {
 
             int origem = aresta->get_id_no_origem();
             int alvo = aresta->get_id_no_alvo();
 
-            if (
-                eleito_origem != origem && eleito_origem != alvo && eleito_alvo != origem && eleito_alvo != alvo)
-            {
+            if ((eleito_origem != origem && eleito_origem != alvo) 
+                && (eleito_alvo != origem && eleito_alvo != alvo)) {
                 arestas_restantes.push_back(aresta);
             }
         }
@@ -423,129 +348,108 @@ Grafo *Guloso::conjunto_dominante_arestas(float alfa)
         fora = arestas_restantes;
     }
 
-    cout << "[DEBUG conj] 4) saiu do while, retornando grafo_marcado\n";
-
-    // TODO: Esse formato está de acordo com o desejado no trabalho?
-
-    return grafo_marcado;
+    return solucao;
 }
 
-int Guloso::get_indice_eleito(vector<Aresta *> dentro, vector<Aresta *> fora)
-{
+int Guloso::get_indice_eleito_comum(vector<Aresta*> fora) {
 
-    // Se for guloso normal, pegar o melhor
-    // (escolha determinística: aresta com maior grau total)
+    /* Para guloso não-random, pega sempre o elemento máximo */
 
-    auto it = max_element(
-        fora.begin(), fora.end(),
-        [this](Aresta *a, Aresta *b)
-        {
-            return grau_total(a) < grau_total(b);
-        });
+    if (fora.empty())
+        throw runtime_error("Não pode escolher entre nenhum item");
+
+    auto it = max_element(fora.begin(), fora.end(), [this](Aresta *a, Aresta *b) {
+        return grau_total(a) < grau_total(b);
+    });
 
     return distance(fora.begin(), it);
 }
 
-int Guloso::get_indice_eleito_random(float alfa, vector<Aresta *> dentro, vector<Aresta *> fora)
-{
+int Guloso::get_indice_eleito_random(float alfa, vector<Aresta *> fora) {
 
-    // Se for guloso aleatório: ordenar, calcular tamanho da amostra e escolher
+    /* Para o guloso random, escolhe aleatoriamente entre os melhores. 
+    A quantidade de melhores é calculada a partir de alfa. */
 
     if (fora.empty())
-    {
-        return get_indice_eleito(dentro, fora); // Se não houver arestas fora, retorna o índice do melhor candidato
-    }
+        throw runtime_error("Sem aresta a ser escolhida.");
 
-    // 1) Ordenar arestas por maior grau total (grau total decrescente)
+    if (alfa < 0 || alfa > 1)
+        throw runtime_error("Valor de alfa impróprio: " + to_string(alfa));
+
     // FIXME: só considerar se tiver ligado a arestas dentro???
-    sort(fora.begin(), fora.end(), [this](Aresta *a, Aresta *b)
-         { return grau_total(a) > grau_total(b); });
+    sort(fora.begin(), fora.end(),
+        [this](Aresta *a, Aresta *b) { return grau_total(a) > grau_total(b); });
 
-    // 2) Calcular o pior valor aceito na seleção de candidatos:
+    int melhor_qualidade = grau_total(fora.front());
+    int pior_qualidade = grau_total(fora.back());
 
-    int melhor = grau_total(fora.front());
-    int pior = grau_total(fora.back());
+    float pior_aceito = melhor_qualidade - alfa * (melhor_qualidade - pior_qualidade);
 
-    // 3) calcula o limite de aceitação
-    float pior_aceito = melhor - alfa * (melhor - pior);
-
-    // Encontrar o tamanho da amostra (contar até o pior candidato aceito)
-
-    // 4) conta quantos candidatos estão acima do pior aceito
+    // Calcular quantos quandidatos serão aceitos
     int tamanho_amostra = 0;
-    for (Aresta *aresta : fora)
-    {
+    for (Aresta *aresta : fora) {
         if (grau_total(aresta) >= pior_aceito)
             tamanho_amostra++;
         else
             break;
     }
-
-    // MODIFICAOCAO FEITA AQUI , faz sentido?
-    //   5) se a amostra ficou vazia, volta ao determinístico
-    if (tamanho_amostra <= 0)
-    {
-        return get_indice_eleito(dentro, fora);
-    }
-    // Dentre os candidatos, escolher um aleatoriamente
-
-    // ADICIONEI O INDICE_MAX AQUI PQ ESTAVA ESTOURANDO O VETOR E A MEMORIA
-    int indice_max = tamanho_amostra - 1; // Último índice da amostra
-    if (indice_max < 0)
-    {
-        // cerr << "[ERROR] Tamanho da amostra é negativo! Retornando 0.\n";
-        return 0; // Retorna 0 se a amostra for negativa, o que não deveria acontecer
-    }
-
-    // 6) sorteia um índice aleatório entre 0 e tamanho_amostra-1
-    return aleatorio->gerar_inteiro(indice_max);
+    
+    // Sortei o índice de uma aresta dentro da amostra
+    return aleatorio->gerar_inteiro(tamanho_amostra-1);
 }
 
-int Guloso::grau_total(Aresta *aresta)
-{
+int Guloso::grau_total(Aresta *aresta) {
+    
+    /* 
+    Calcula o grau total de uma aresta (a soma do grau do nó de origem 
+    com o grau do nó alvo) 
+    */
+    
+    int grau_origem = grafo->encontra_no_por_id(
+        aresta->get_id_no_origem()
+    )->get_arestas().size();
+    
+    int grau_alvo = grafo->encontra_no_por_id(
+        aresta->get_id_no_alvo()
+    )->get_arestas().size();
 
-    // Calcula o grau total de uma aresta (soma do grau do de origem com alvo)
-    return grafo->encontra_no_por_id(aresta->get_id_no_alvo())->get_arestas().size() + grafo->encontra_no_por_id(aresta->get_id_no_origem())->get_arestas().size();
+    return grau_origem + grau_alvo;
 }
 
-function<int(vector<Aresta *>, vector<Aresta *>)> Guloso::get_heuritica(float alfa)
-{
+function<int(vector<Aresta *>)> Guloso::get_heuristica(
+    float alfa
+) {
 
     /* Retorna um lambda com a heurística a ser empregada, baseado no valor de
     alfa */
 
-    if (alfa == 0)
-    {
+    if (alfa == 0) {
 
-        return [this](vector<Aresta *> dentro, vector<Aresta *> fora)
-        {
-            return get_indice_eleito(dentro, fora);
+        return [this](vector<Aresta *> fora) {
+            return get_indice_eleito_comum(fora);
         };
-    }
-    else
-    {
 
-        return [this, alfa](vector<Aresta *> dentro, vector<Aresta *> fora)
-        {
-            return get_indice_eleito_random(alfa, dentro, fora);
+    } else {
+
+        return [this, alfa](vector<Aresta *> fora) {
+            return get_indice_eleito_random(alfa, fora);
         };
     }
 }
 
-int Guloso::qualidade_da_solucao()
-{
+int Guloso::qualidade_da_solucao() {
 
-    /*
-    Assume que arestas estão duplicadas, e ambas foram marcadas como
-    dominantes.
-    */
+  /*
+  Assume que arestas estão duplicadas, e ambas foram marcadas como
+  dominantes.
+  */
 
-    int qtd_arestas_dominantes = 0;
+  int qtd_arestas_dominantes = 0;
 
-    for (No *no : grafo->get_lista_adj())
-        for (Aresta *aresta : no->get_arestas())
-            if (aresta->get_domina())
-                qtd_arestas_dominantes++;
+  for (No *no : grafo->get_lista_adj())
+    for (Aresta *aresta : no->get_arestas())
+      if (aresta->get_domina())
+        qtd_arestas_dominantes++;
 
-    return qtd_arestas_dominantes / 2;
+  return qtd_arestas_dominantes / 2;
 }

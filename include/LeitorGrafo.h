@@ -19,47 +19,46 @@ public:
         if (!arquivoEntrada.is_open()) 
             throw runtime_error("Erro ao abrir o arquivo: ");
 
-        bool ponderado_aresta, ponderado_vertice, direcionado;
-        int ordem;
-        string linha, palavra;
-
+        
         // Lê a primeira linha
-
+        
+        string linha, palavra;
         if (!getline(arquivoEntrada, linha))
             throw runtime_error("Erro ao ler a primeira linha");
-
+    
         {
+            bool ponderado_aresta, ponderado_vertice, direcionado;
             istringstream iss(linha);
             iss >> direcionado >> ponderado_aresta >> ponderado_vertice;
+            
             grafo->set_direcionado(direcionado);
             grafo->set_ponderado_vertice(ponderado_vertice);
-            grafo->set_ponderado_aresta(ponderado_aresta);      
-            iss >> ordem;
+            grafo->set_ponderado_aresta(ponderado_aresta);
         }
     
-        
-        
-
         // Lê a segunda linha
 
         if (!getline(arquivoEntrada, linha)) 
             throw runtime_error("Erro ao ler a segunda linha");
         
-        istringstream iss(linha);
-        iss >> ordem;
+        int qtd_nos; // ordem do grafo é gerenciada internamente
+
+        {
+            istringstream iss(linha);
+            iss >> qtd_nos;
+
+            if(qtd_nos == 0 || qtd_nos == 1) 
+                throw runtime_error("Grafo nulo ou trivial não fazem sentido.");
+        }
 
         // verifica se é grafo nulo ou trivial
 
-        if(ordem == 0 || ordem == 1) 
-             throw runtime_error("Grafo nulo ou trivial não fazem sentido.");  //PORQUE N MANDA A MSG NO CONSOLE SÓ DA O ERROR???
-          
-
         // Gerando a lista de nós do grafo e setando os seus pesos caso seja
         // ponderado
-        for (int i = 0; i < ordem; i++) { // ordem declarada no escopo "cobre" a da classe
+        for (int i = 0; i < qtd_nos; i++) { // ordem declarada no escopo "cobre" a da classe
 
             if (!getline(arquivoEntrada, linha)) 
-                throw runtime_error("Erro ao ler a linha" + to_string(i + 3));
+                throw runtime_error("Erro ao ler a linha " + to_string(i + 3));
                 
             istringstream iss(linha);
             NoId id_no;
@@ -79,7 +78,7 @@ public:
 
             iss >> id_no_origem >>
                 id_no_alvo;  // Lê os ids dos nós origem e alvo
-            if (ponderado_aresta) {
+            if (grafo->get_ponderado_aresta()) {
                 iss >> peso;  // Lê o peso da aresta, se o grafo for ponderado
             }
 
@@ -92,7 +91,7 @@ public:
             }
 
             // Se o grafo for direcionado, não adiciona a aresta de volta
-            if (!direcionado) {
+            if (!grafo->get_direcionado()) {
                 // Adiciona a aresta de volta ao nó de destino
                 for (No *no : grafo->get_lista_adj()) {
                     if (no->get_id() == id_no_alvo) {

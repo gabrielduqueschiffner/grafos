@@ -20,13 +20,13 @@ const int MENOS_INFINITO = numeric_limits<int>::min();
 
 // Grafo* Grafo::
 
-Grafo *Grafo::clone()
+Grafo* Grafo::clone()
 {
-    cout << "[DEBUG clone] início do clone()\n";
-    Grafo *clone = new Grafo();
+    /* Aloca um clone deste grafo no ponteiro passado */
 
-    for (No *no_origem : lista_adj)
-    {
+    Grafo* clone = new Grafo();
+
+    for (No *no_origem : lista_adj) {
 
         No *copia_no_origem = new No(no_origem->get_id(), no_origem->get_peso());
 
@@ -42,12 +42,10 @@ Grafo *Grafo::clone()
         }
     }
 
-    clone->set_ordem(ordem);
     clone->set_direcionado(in_direcionado);
     clone->set_ponderado_aresta(in_ponderado_aresta);
     clone->set_ponderado_vertice(in_ponderado_vertice);
 
-    cout << "[DEBUG clone] fim do clone(), nós copiados = " << clone->get_lista_adj().size() << "\n";
     return clone;
 }
 
@@ -55,7 +53,13 @@ Grafo *Grafo::clone()
 // Base
 // =======================================
 
-Grafo::Grafo() {}
+Grafo::Grafo() {
+    ordem = 0;
+    in_direcionado = false;
+    in_ponderado_aresta = false;
+    in_ponderado_vertice = false;
+    lista_adj = {};
+}
 
 Grafo::~Grafo()
 {
@@ -71,7 +75,6 @@ void Grafo::adiciona_no(No *no)
 
 void Grafo::adiciona_aresta(NoId id_origem, NoId id_alvo, int peso)
 {
-
     /*
     Adiciona uma nova aresta ao grafo, criando a partir dos parâmetros, uma
     indo do origem pro alvo, e se for grafo não direcionado, uma indo do alvo
@@ -327,7 +330,6 @@ void Grafo::exportar_grafo_para_arquivo_csacademy(Grafo *g, const string &nome_a
 void Grafo::set_direcionado(int direcao) { in_direcionado = direcao; }
 void Grafo::set_ponderado_aresta(int ponderado) { in_ponderado_aresta = ponderado; }
 void Grafo::set_ponderado_vertice(int ponderado) { in_ponderado_vertice = ponderado; }
-void Grafo::set_ordem(int ordem_grafo) { ordem = ordem_grafo; }
 int Grafo::get_direcionado() { return in_direcionado; }
 int Grafo::get_ponderado_aresta() { return in_ponderado_aresta; }
 int Grafo::get_ponderado_vertice() { return in_ponderado_vertice; }
@@ -702,7 +704,6 @@ Grafo *Grafo::gera_grafo_transposto()
         }
     }
 
-    transposto->set_ordem(ordem);
     transposto->set_direcionado(in_direcionado);
     transposto->set_ponderado_aresta(in_ponderado_aresta);
     transposto->set_ponderado_vertice(in_ponderado_vertice);
