@@ -35,10 +35,23 @@ Grafo* Grafo::clone()
         for (Aresta *aresta : no_origem->get_arestas())
         {
 
-            copia_no_origem->adiciona_aresta(new Aresta(
+            // copia_no_origem->adiciona_aresta(new Aresta(
+            //     aresta->get_id_no_origem(),
+            //     aresta->get_id_no_alvo(),
+            //     aresta->get_peso()));
+
+             Aresta* copia_aresta = new Aresta(
                 aresta->get_id_no_origem(),
                 aresta->get_id_no_alvo(),
-                aresta->get_peso()));
+                aresta->get_peso());
+
+            // copiar flags/estado importantes da aresta (ex.: domina)
+            copia_aresta->set_domina(aresta->get_domina());
+
+            // se houver outras flags, copie aqui também:
+            // copia_aresta->set_algo(aresta->get_algo());
+
+            copia_no_origem->adiciona_aresta(copia_aresta);
         }
     }
 

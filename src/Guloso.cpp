@@ -129,7 +129,7 @@ void Guloso::atualizar_probs() {
     // 2) encontrar F*, melhor custo global
     float f_estrela = 
         (melhor_solucao != nullptr) 
-        ? static_cast<float>(custo_da_solucao(melhor_solucao)) 
+        ? max(static_cast<float>(custo_da_solucao(melhor_solucao)), VALOR_MINIMO)      //mudei algo aqui
         : max(custo_media, VALOR_MINIMO);
         
     vector<float> qi(tam_alfas);
@@ -236,7 +236,7 @@ Grafo* Guloso::rodar_reativo() {
         
         if ((i != 0) && (i % k_bloco == 0)) {
 
-            atualizar_probs();
+          
         
             // BUG:  Valores constantes ao longo das iterações. Remover print dps
             cout << "Iteração " << i << "\n";
@@ -244,10 +244,13 @@ Grafo* Guloso::rodar_reativo() {
                 cout << "  alfa[" << j << "]=" << alfas[j]
                     << " prob=" << probs_alfas[j]
                     << " custo_media=" << (qtd_alfas[j] > 0 ? custo_alfas[j] / qtd_alfas[j] : 0)
+                    << " qtd=" << qtd_alfas[j]       //add isso
                     << "\n";
             }
 
             cout << "Melhor custo global: " << custo_da_solucao(melhor_solucao) << "\n\n";
+
+              atualizar_probs();  //troquei de posicao
         }
 
         int indice_alfa_eleito = selecionar_alfa();
@@ -261,9 +264,27 @@ Grafo* Guloso::rodar_reativo() {
         
         atualizar_custos(indice_alfa_eleito, solucao);
 
-        // Só liberar memória caso a posse não tenha sido transferida
-        if (!atualizar_melhor_solucao(solucao))
-            delete solucao;
+
+        int custo = custo_da_solucao(solucao);
+        cout << "[DEBUG] custo solucao alfa " << indice_alfa_eleito << " = " << custo << "\n";
+
+
+        // // Só liberar memória caso a posse não tenha sido transferida
+        // if (!atualizar_melhor_solucao(solucao))
+        //     delete solucao;
+
+        // tenta atualizar a melhor solução e captura o retorno
+bool substituiu = atualizar_melhor_solucao(solucao);
+
+if (substituiu) {
+    // seguro: atualizar_melhor_solucao retornou true, então melhor_solucao foi
+    // atualizada (ou substituída) e não é nullptr — imprime o custo do clone/ponteiro salvo
+    cout << "[DEBUG] melhor atualizado, custo melhor_solucao = "
+         << custo_da_solucao(melhor_solucao) << "\n";
+} else {
+    // não substituiu: liberar a solução temporária (evita leak)
+    delete solucao;
+}
     }
 
     return melhor_solucao;

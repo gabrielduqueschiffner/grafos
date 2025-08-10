@@ -54,7 +54,7 @@ int main(int argc, char *argv[])
             Grafo* solEstatica = guloso.conjunto_dominante_arestas(alpha);
             
             solEstatica->imprime_grafo();
-            cout << "Qualidade: " << guloso.custo_da_solucao(solEstatica);
+            cout << "Qualidade: " << guloso.custo_da_solucao(solEstatica);// pq o custo aqui e la embaixo? esse ta estranho
 
             if (alpha == 0)
                 cout << "==> GULOSO PADRAO (alpha=0): ";
@@ -69,9 +69,9 @@ int main(int argc, char *argv[])
 
         if (true)
         {
-            vector<float> alfas = { 0.0f, 0.25f, 0.5f, 0.75f, 1.0f };
-            int max_iter = 5000;      // rodadas totais
-            int k_bloco  = 5;       // repensa probabilidades a cada 5 iters
+            vector<float> alfas = {0.25f, 0.5f, 0.75f}; //Professora pediu 3 alfas
+            int max_iter = 300;      // rodadas totais   (no minimo 300)
+            int k_bloco  = 30;       // repensa probabilidades a cada x iters (de 30 a 50)
             int seed    = 42;
             
             Guloso reativo(grafo, alfas, max_iter, k_bloco, seed);
@@ -85,7 +85,7 @@ int main(int argc, char *argv[])
             cout << "\n==> GULOSO REATIVO: "; 
             cout << reativo.custo_da_solucao(solReativa) << endl;
             
-            // solReativa->imprime_grafo();
+             solReativa->imprime_grafo();
         }
 
         delete grafo;
