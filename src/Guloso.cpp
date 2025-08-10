@@ -254,6 +254,7 @@ Grafo* Guloso::rodar_reativo() {
         int indice_alfa_eleito = selecionar_alfa();
         float alfa_eleito = alfas[indice_alfa_eleito];
 
+        // Aloca um grafo, transferindo memória 
         solucao = conjunto_dominante_arestas(alfa_eleito);
 
         if (!solucao)
@@ -262,10 +263,11 @@ Grafo* Guloso::rodar_reativo() {
         atualizar_qualidades(indice_alfa_eleito, solucao);
 
         // Só liberar memória caso a posse não tenha sido transferida
-        atualizar_melhor_solucao(solucao);
+        if (!atualizar_melhor_solucao(solucao))
+            delete solucao;
     }
 
-    return solucao;
+    return melhor_solucao;
 }
 
 Grafo* Guloso::conjunto_dominante_arestas(float alfa) {
@@ -351,7 +353,7 @@ Grafo* Guloso::conjunto_dominante_arestas(float alfa) {
     return solucao;
 }
 
-int Guloso::get_indice_eleito_comum(vector<Aresta*> fora) {
+int Guloso::get_indice_eleito_comum(vector<Aresta*>& fora) {
 
     /* Para guloso não-random, pega sempre o elemento máximo */
 
@@ -365,7 +367,7 @@ int Guloso::get_indice_eleito_comum(vector<Aresta*> fora) {
     return distance(fora.begin(), it);
 }
 
-int Guloso::get_indice_eleito_random(float alfa, vector<Aresta *> fora) {
+int Guloso::get_indice_eleito_random(float alfa, vector<Aresta*>& fora) {
 
     /* Para o guloso random, escolhe aleatoriamente entre os melhores. 
     A quantidade de melhores é calculada a partir de alfa. */
@@ -425,13 +427,13 @@ function<int(vector<Aresta *>)> Guloso::get_heuristica(
 
     if (alfa == 0) {
 
-        return [this](vector<Aresta *> fora) {
+        return [this](vector<Aresta*> fora) {
             return get_indice_eleito_comum(fora);
         };
 
     } else {
 
-        return [this, alfa](vector<Aresta *> fora) {
+        return [this, alfa](vector<Aresta*> fora) {
             return get_indice_eleito_random(alfa, fora);
         };
     }

@@ -70,12 +70,13 @@ int main(int argc, char *argv[])
         if (true)
         {
             vector<float> alfas = { 0.0f, 0.25f, 0.5f, 0.75f, 1.0f };
-            int max_iter = 100;      // rodadas totais
+            int max_iter = 5000;      // rodadas totais
             int k_bloco  = 5;       // repensa probabilidades a cada 5 iters
             int seed    = 42;
             
             Guloso reativo(grafo, alfas, max_iter, k_bloco, seed);
             
+            // A posse da solução é do Guloso
             Grafo* solReativa = reativo.rodar_reativo();
             
             if (!solReativa)
@@ -85,7 +86,6 @@ int main(int argc, char *argv[])
             cout << reativo.qualidade_da_solucao(solReativa) << endl;
             
             // solReativa->imprime_grafo();
-            delete solReativa;
         }
 
         delete grafo;

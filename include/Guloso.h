@@ -41,12 +41,12 @@ private:
     int selecionar_alfa();
     
     bool atualizar_melhor_solucao(Grafo* solucao);
-    void atualizar_qualidades(int indice_alfa, Grafo* solucao);  // TODO: faço int ou float?
+    void atualizar_qualidades(int indice_alfa, Grafo* solucao);
     
     // TODO: Depois, adicionar registro de detalhes das iterações? 
 
-    int get_indice_eleito_comum(vector<Aresta*> fora);
-    int get_indice_eleito_random(float alfa, vector<Aresta*> fora);
+    int get_indice_eleito_comum(vector<Aresta*>& fora);
+    int get_indice_eleito_random(float alfa, vector<Aresta*>& fora);
     int grau_total(Aresta* aresta);
     function<int(vector<Aresta*>)> get_heuristica(float alfa);
     
