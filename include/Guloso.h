@@ -13,7 +13,7 @@ public:
     Grafo* conjunto_dominante_arestas(float alfa);
     Grafo* rodar_reativo();
 
-    int qualidade_da_solucao(Grafo* solucao);
+    int custo_da_solucao(Grafo* solucao);
 
 private:
 
@@ -25,14 +25,14 @@ private:
     int k_bloco;
 
     vector<float> probs_alfas; // probabilidade de cada alfa ser escolhido p_i
-    vector<float> qualidade_alfas; // qualidade absoluta de cada alfa
-    vector<float> qualidade_relat_alfas; // qualidade relativa de cada alfa
+    vector<float> custo_alfas; // custo absoluta de cada alfa
+    vector<float> custo_relat_alfas; // custo relativa de cada alfa
 
     vector<float> qtd_alfas; // quantidade de soluções encontradas para cada alfa
     float delta;  // expoente das fórmulas qi = (F*/Mi)^δ , usado para elevar as diferenças
 
 
-    float qualidade_media;
+    float custo_media;
     Grafo* melhor_solucao;
 
     //metodos
@@ -41,7 +41,7 @@ private:
     int selecionar_alfa();
     
     bool atualizar_melhor_solucao(Grafo* solucao);
-    void atualizar_qualidades(int indice_alfa, Grafo* solucao);
+    void atualizar_custos(int indice_alfa, Grafo* solucao);
     
     // TODO: Depois, adicionar registro de detalhes das iterações? 
 
@@ -50,5 +50,5 @@ private:
     int grau_total(Aresta* aresta);
     function<int(vector<Aresta*>)> get_heuristica(float alfa);
     
-    int qualidade_da_solucao();
+    int custo_da_solucao();
 };

@@ -55,10 +55,10 @@ Guloso::Guloso(
     int tam_alfa = alfas.size(); // Número de alfas
     
     probs_alfas.assign(tam_alfa, 1.0f / tam_alfa);     
-    qualidade_alfas.assign(tam_alfa, 0.0f);         
-    qualidade_relat_alfas.assign(tam_alfa, 0.0f); 
+    custo_alfas.assign(tam_alfa, 0.0f);         
+    custo_relat_alfas.assign(tam_alfa, 0.0f); 
     qtd_alfas.assign(tam_alfa, 0.0f);          
-    qualidade_media = 0.0f; // FIXME: Não usado
+    custo_media = 0.0f; 
 
     // Valor padrão -1 pra seed, sinaliza que não foi passada uma seed
     if (seed == -1) {
@@ -81,7 +81,7 @@ Guloso::~Guloso() {
     // TODO: Deveria ser recebido e passado invés de guardado?
 }
 
-int Guloso::qualidade_da_solucao(Grafo *solucao) {
+int Guloso::custo_da_solucao(Grafo *solucao) {
 
     /*
     Assume que arestas estão duplicadas, e ambas foram marcadas como
@@ -102,59 +102,58 @@ int Guloso::qualidade_da_solucao(Grafo *solucao) {
     return qtd_arestas_dominantes / 2;
 }
 
+const float VALOR_MINIMO = 1e-6f;
+
 void Guloso::atualizar_probs() {
     
-    /* Atualiza as probabilidades de cada alfa, baseado na qualidade média
+    /* Atualiza as probabilidades de cada alfa, baseado na custo média
     das soluções encontradas até o momento. */
 
     int tam_alfas = static_cast<int>(alfas.size());
 
-    const float INFINITO = numeric_limits<float>::infinity();
+    float soma = 0;
+    int contagem = 0;
+    for (int i = 0; i < tam_alfas; ++i) {
+        if (qtd_alfas[i] > 0) {
+            soma += (custo_alfas[i] / static_cast<float>((qtd_alfas[i])));
+            ++contagem;
+        }
+    }
+
+    custo_media = (contagem > 0) ? (soma / contagem) : VALOR_MINIMO; 
 
     // FIXME: Setar como infinito mata a exploração?
     for (int i = 0; i < tam_alfas; i++)
-        qualidade_relat_alfas[i] = qtd_alfas[i] > 0 ? qualidade_alfas[i] / qtd_alfas[i] : INFINITO;
+        custo_relat_alfas[i] = qtd_alfas[i] > 0 ? custo_alfas[i] / qtd_alfas[i] : custo_media;
 
-    // 2) encontrar F*, melhor qualidade global
-    int f_estrela = (melhor_solucao != nullptr) ? qualidade_da_solucao(melhor_solucao) : 0; 
+    // 2) encontrar F*, melhor custo global
+    float f_estrela = 
+        (melhor_solucao != nullptr) 
+        ? static_cast<float>(custo_da_solucao(melhor_solucao)) 
+        : max(custo_media, VALOR_MINIMO);
+        
+    vector<float> qi(tam_alfas);
 
     // 3) calcular qi
     for (int i = 0; i < tam_alfas; i++) {
 
-        float m_i = qualidade_relat_alfas[i]; // m_i é a qualidade relativa do alfa i
-        
-        if (m_i > 0 && m_i != INFINITO)
-            qualidade_relat_alfas[i] = pow(f_estrela / qualidade_relat_alfas[i], delta);
-        else
-            qualidade_relat_alfas[i] = 0;
+        float m_i = custo_relat_alfas[i]; // m_i é a custo relativa do alfa i
+        qi[i] = (m_i > 0) ? pow(f_estrela / max(m_i, VALOR_MINIMO), delta) : 0;
     }
-
-    // 4) média global de m_i
-    
-    float soma = 0;
-    int conatgem = 0;
-    for (int i = 0; i < tam_alfas; ++i) {
-        if (qtd_alfas[i] > 0) {
-            soma += (qualidade_alfas[i] / float(qtd_alfas[i]));
-            ++conatgem;
-        }
-    }
-
-    qualidade_media = (conatgem > 0) ? (soma / conatgem) : 0; 
 
     // 5) Normalizar qi para obter probabilidades (probs_alfas)
     
     float soma_qi = accumulate(
-        qualidade_relat_alfas.begin(), 
-        qualidade_relat_alfas.end(), 
+        qi.begin(), 
+        qi.end(), 
         0.0f
     );
 
     
-    if (soma_qi > 0) {
+    if (soma_qi > VALOR_MINIMO) {
         
         for (int i = 0; i < tam_alfas; ++i) 
-            probs_alfas[i] = qualidade_relat_alfas[i] / soma_qi;
+            probs_alfas[i] = qi[i] / soma_qi;
         
     } else {
 
@@ -166,7 +165,7 @@ void Guloso::atualizar_probs() {
 
     // Resetar variáveis
     
-    fill(qualidade_alfas.begin(), qualidade_alfas.end(), 0.0f);
+    fill(custo_alfas.begin(), custo_alfas.end(), 0.0f);
     fill(qtd_alfas.begin(), qtd_alfas.end(), 0.0f);
 }
 
@@ -175,7 +174,7 @@ bool Guloso::atualizar_melhor_solucao(Grafo *solucao) {
     /* Atualiza a melhor solução encontrada, caso a nova solução for melhor. Faz
     isso ao guardar um clone da solução. */
 
-    if (!melhor_solucao || qualidade_da_solucao(solucao) > qualidade_da_solucao(melhor_solucao)) {
+    if (!melhor_solucao || custo_da_solucao(solucao) < custo_da_solucao(melhor_solucao)) {
         
         if (melhor_solucao)
             delete melhor_solucao; 
@@ -188,13 +187,13 @@ bool Guloso::atualizar_melhor_solucao(Grafo *solucao) {
     return false;
 }
 
-void Guloso::atualizar_qualidades(int indice_alfa, Grafo *solucao) {
+void Guloso::atualizar_custos(int indice_alfa, Grafo *solucao) {
 
-    /* Atualiza as qualidades relativas e absolutas de cada alfa, baseado na
-    qualidade da solução encontrada. */
+    /* Atualiza as custos relativas e absolutas de cada alfa, baseado na
+    custo da solução encontrada. */
 
-    int qualidade = qualidade_da_solucao(solucao);
-    qualidade_alfas[indice_alfa] += qualidade;
+    int custo = custo_da_solucao(solucao);
+    custo_alfas[indice_alfa] += custo;
     qtd_alfas[indice_alfa] += 1;
 }
 
@@ -239,16 +238,16 @@ Grafo* Guloso::rodar_reativo() {
 
             atualizar_probs();
         
-            if ((i % k_bloco) == 0) {
-                cout << "Iteração " << i << "\n";
-                for (size_t j = 0; j < alfas.size(); ++j) {
-                    cout << "  alfa[" << j << "]=" << alfas[j]
-                        << " prob=" << probs_alfas[j]
-                        << " qualidade_media=" << (qtd_alfas[j] > 0 ? qualidade_alfas[j] / qtd_alfas[j] : 0)
-                        << "\n";
-                }
-                cout << "Melhor qualidade global: " << qualidade_da_solucao(melhor_solucao) << "\n\n";
+            // BUG:  Valores constantes ao longo das iterações. Remover print dps
+            cout << "Iteração " << i << "\n";
+            for (size_t j = 0; j < alfas.size(); ++j) {
+                cout << "  alfa[" << j << "]=" << alfas[j]
+                    << " prob=" << probs_alfas[j]
+                    << " custo_media=" << (qtd_alfas[j] > 0 ? custo_alfas[j] / qtd_alfas[j] : 0)
+                    << "\n";
             }
+
+            cout << "Melhor custo global: " << custo_da_solucao(melhor_solucao) << "\n\n";
         }
 
         int indice_alfa_eleito = selecionar_alfa();
@@ -260,7 +259,7 @@ Grafo* Guloso::rodar_reativo() {
         if (!solucao)
             throw runtime_error("Não foi retornada uma solução.");
         
-        atualizar_qualidades(indice_alfa_eleito, solucao);
+        atualizar_custos(indice_alfa_eleito, solucao);
 
         // Só liberar memória caso a posse não tenha sido transferida
         if (!atualizar_melhor_solucao(solucao))
@@ -275,7 +274,7 @@ Grafo* Guloso::conjunto_dominante_arestas(float alfa) {
     /*
     Algoritmo guloso random para encontrar um conjunto dominante de arestas.
     Ordena todas as arestas que ainda não foram consideradas de acordo com a sua
-    qualidade dfinida pela heurística, e em seguida escolhe uma entre as 
+    custo dfinida pela heurística, e em seguida escolhe uma entre as 
     melhores (entre as N primeiras).
     */
 
@@ -382,10 +381,10 @@ int Guloso::get_indice_eleito_random(float alfa, vector<Aresta*>& fora) {
     sort(fora.begin(), fora.end(),
         [this](Aresta *a, Aresta *b) { return grau_total(a) > grau_total(b); });
 
-    int melhor_qualidade = grau_total(fora.front());
-    int pior_qualidade = grau_total(fora.back());
+    int melhor_custo = grau_total(fora.front());
+    int pior_custo = grau_total(fora.back());
 
-    float pior_aceito = melhor_qualidade - alfa * (melhor_qualidade - pior_qualidade);
+    float pior_aceito = melhor_custo - alfa * (melhor_custo - pior_custo);
 
     // Calcular quantos quandidatos serão aceitos
     int tamanho_amostra = 0;
@@ -439,7 +438,7 @@ function<int(vector<Aresta *>)> Guloso::get_heuristica(
     }
 }
 
-int Guloso::qualidade_da_solucao() {
+int Guloso::custo_da_solucao() {
 
   /*
   Assume que arestas estão duplicadas, e ambas foram marcadas como

@@ -10,29 +10,29 @@ using namespace std;
 int main(int argc, char *argv[])
 {
     vector<string> arquivos = {
-        // "g_25_0.16_0_1_0.txt",
-        // "g_25_0.16_0_1_1.txt",
-        // "g_25_0.21_0_1_0.txt",
-        // "g_25_0.21_0_1_1.txt",
-        // "g_25_0.26_0_1_0.txt",
-        // "g_25_0.26_0_1_1.txt",
-        // "g_40_0.10_0_1_0.txt",
-        // "g_40_0.10_0_1_1.txt",
-        // "g_40_0.15_0_1_0.txt",
-        // "g_40_0.15_0_1_1.txt",
-        // "g_40_0.20_0_1_0.txt",
-        // "g_40_0.20_0_1_1.txt",
-        // "g_60_0.07_0_1_0.txt",
-        // "g_60_0.07_0_1_1.txt",
-        // "g_60_0.12_0_1_0.txt",
-        // "g_60_0.12_0_1_1.txt",
-        // "g_60_0.17_0_1_0.txt",
-        // "g_60_0.17_0_1_1.txt",
+        "g_25_0.16_0_1_0.txt",
+        "g_25_0.16_0_1_1.txt",
+        "g_25_0.21_0_1_0.txt",
+        "g_25_0.21_0_1_1.txt",
+        "g_25_0.26_0_1_0.txt",
+        "g_25_0.26_0_1_1.txt",
+        "g_40_0.10_0_1_0.txt",
+        "g_40_0.10_0_1_1.txt",
+        "g_40_0.15_0_1_0.txt",
+        "g_40_0.15_0_1_1.txt",
+        "g_40_0.20_0_1_0.txt",
+        "g_40_0.20_0_1_1.txt",
+        "g_60_0.07_0_1_0.txt",
+        "g_60_0.07_0_1_1.txt",
+        "g_60_0.12_0_1_0.txt",
+        "g_60_0.12_0_1_1.txt",
+        "g_60_0.17_0_1_0.txt",
+        "g_60_0.17_0_1_1.txt",
     };
 
-    // for (string arquivo : arquivos) 
+    for (string arquivo : { argv[1] }) // arquivos)
     {
-        string caminho = argv[1]; //"instancias/t2/" + arquivo;
+        string caminho = arquivo; //"instancias/t2/" + arquivo;
 
         if (argc != 2)
             throw invalid_argument("Passar arquivo a ser lido como argumento.");
@@ -54,14 +54,14 @@ int main(int argc, char *argv[])
             Grafo* solEstatica = guloso.conjunto_dominante_arestas(alpha);
             
             solEstatica->imprime_grafo();
-            cout << "Qualidade: " << guloso.qualidade_da_solucao(solEstatica);
+            cout << "Qualidade: " << guloso.custo_da_solucao(solEstatica);
 
             if (alpha == 0)
                 cout << "==> GULOSO PADRAO (alpha=0): ";
             else
                 cout << "==> GULOSO RANDOM (alpha=" << alpha << "): "; 
             
-            cout << guloso.qualidade_da_solucao(solEstatica) << endl;
+            cout << guloso.custo_da_solucao(solEstatica) << endl;
 
             solEstatica->imprime_grafo();
             delete solEstatica;
@@ -83,7 +83,7 @@ int main(int argc, char *argv[])
                 throw runtime_error("Não foi gerada solução");
 
             cout << "\n==> GULOSO REATIVO: "; 
-            cout << reativo.qualidade_da_solucao(solReativa) << endl;
+            cout << reativo.custo_da_solucao(solReativa) << endl;
             
             // solReativa->imprime_grafo();
         }
