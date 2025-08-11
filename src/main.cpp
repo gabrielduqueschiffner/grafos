@@ -1,4 +1,6 @@
+#include <cmath>
 #include <cstdlib>
+#include <ostream>
 #include <stdexcept>
 #include <vector>
 
@@ -6,86 +8,92 @@
 #include "../include/types.h"
 #include "../include/Guloso.h"
 
+int INFINITO = numeric_limits<int>::max();
+
+int SEED = -1;
+string PREFIXO = "instancias/t2/";
+string SUFIXO = ".txt";
+
+vector<string> INSTANCIAS = {
+    "g_25_0.16_0_1_0",
+    "g_25_0.16_0_1_1",
+    "g_25_0.21_0_1_0",
+    "g_25_0.21_0_1_1",
+    "g_25_0.26_0_1_0",
+    "g_25_0.26_0_1_1",
+    "g_40_0.10_0_1_0",
+    "g_40_0.10_0_1_1",
+    "g_40_0.15_0_1_0",
+    "g_40_0.15_0_1_1",
+    "g_40_0.20_0_1_0",
+    "g_40_0.20_0_1_1",
+    "g_60_0.07_0_1_0",
+    "g_60_0.07_0_1_1",
+    "g_60_0.12_0_1_0",
+    "g_60_0.12_0_1_1",
+    "g_60_0.17_0_1_0",
+    "g_60_0.17_0_1_1",
+};
+
+int REPETICOES_POR_INSTANCIA = 10;
+int REPETICOES_POR_ALFA = 30;
+int ITERACOES = 300;
+int ITERACOES_POR_BLOCO = 30;
+vector<float> ALFAS = {0.25f, 0.5f, 0.75f};
+
 using namespace std;
-int main(int argc, char *argv[])
-{
-    vector<string> arquivos = {
-        "g_25_0.16_0_1_0.txt",
-        "g_25_0.16_0_1_1.txt",
-        "g_25_0.21_0_1_0.txt",
-        "g_25_0.21_0_1_1.txt",
-        "g_25_0.26_0_1_0.txt",
-        "g_25_0.26_0_1_1.txt",
-        "g_40_0.10_0_1_0.txt",
-        "g_40_0.10_0_1_1.txt",
-        "g_40_0.15_0_1_0.txt",
-        "g_40_0.15_0_1_1.txt",
-        "g_40_0.20_0_1_0.txt",
-        "g_40_0.20_0_1_1.txt",
-        "g_60_0.07_0_1_0.txt",
-        "g_60_0.07_0_1_1.txt",
-        "g_60_0.12_0_1_0.txt",
-        "g_60_0.12_0_1_1.txt",
-        "g_60_0.17_0_1_0.txt",
-        "g_60_0.17_0_1_1.txt",
-    };
-
-    for (string arquivo : { argv[1] }) // arquivos)
-    {
-        string caminho = arquivo; //"instancias/t2/" + arquivo;
-
-        if (argc != 2)
-            throw invalid_argument("Passar arquivo a ser lido como argumento.");
+int main(int argc, char *argv[]) {
     
-        Grafo* grafo = LeitorGrafo::lerDeArquivo(caminho);
+    for (string instancia : INSTANCIAS) {        
     
-        // cout << caminho << endl;
-        // grafo->imprime_resumo_grafo();
-        // grafo->imprime_grafo();
+        cout << "INSTÂNCIA: " << instancia << endl;
+
+        string arquivo = PREFIXO+instancia+SUFIXO;
+        Grafo* grafo = LeitorGrafo::lerDeArquivo(arquivo);
         
-        if (false)
-        {
-            float alpha = 0.5f;
-            int seed = -1;
-            
-            Guloso guloso(grafo, seed);
-            
-            // FIXME: É estranho passar o alfa direto...?
-            Grafo* solEstatica = guloso.conjunto_dominante_arestas(alpha);
-            
-            solEstatica->imprime_grafo();
-            cout << "Qualidade: " << guloso.custo_da_solucao(solEstatica);// pq o custo aqui e la embaixo? esse ta estranho
+        for (int i = 0; i < REPETICOES_POR_INSTANCIA; i++) {
 
-            if (alpha == 0)
-                cout << "==> GULOSO PADRAO (alpha=0): ";
-            else
-                cout << "==> GULOSO RANDOM (alpha=" << alpha << "): "; 
-            
-            cout << guloso.custo_da_solucao(solEstatica) << endl;
+            cout << "=> Repetição: " << i << endl; 
 
-            solEstatica->imprime_grafo();
-            delete solEstatica;
-        }
+            vector<int> melhor_custo_alfas;
+            melhor_custo_alfas.assign(ALFAS.size(), INFINITO);
 
-        if (true)
-        {
-            vector<float> alfas = {0.25f, 0.5f, 0.75f}; //Professora pediu 3 alfas
-            int max_iter = 300;      // rodadas totais   (no minimo 300)
-            int k_bloco  = 30;       // repensa probabilidades a cada x iters (de 30 a 50)
-            int seed    = 42;
-            
-            Guloso reativo(grafo, alfas, max_iter, k_bloco, seed);
-            
-            // A posse da solução é do Guloso
-            Grafo* solReativa = reativo.rodar_reativo();
-            
-            if (!solReativa)
-                throw runtime_error("Não foi gerada solução");
+            for (int indice_alfa = 0; indice_alfa < ALFAS.size(); indice_alfa++) {
+                
+                for (int j = 0; j < REPETICOES_POR_ALFA; j++) {
 
-            cout << "\n==> GULOSO REATIVO: "; 
-            cout << reativo.custo_da_solucao(solReativa) << endl;
+                    float alfa = ALFAS[indice_alfa];
+                    Guloso guloso_random(grafo, SEED);
+                    Grafo* solEstatica = guloso_random.conjunto_dominante_arestas(alfa);
+                    
+                    int custo = guloso_random.custo_da_solucao(solEstatica);
+                    if (custo < melhor_custo_alfas[indice_alfa])
+                        melhor_custo_alfas[indice_alfa] = custo;
+                
+                    delete solEstatica;
+                }
+            }
             
-             solReativa->imprime_grafo();
+            // Imprimir melhores custos random
+            cout << "Random: ";
+            for (int i=0; i<ALFAS.size(); i++)
+                cout << ALFAS[i] << ": " << melhor_custo_alfas[i] << ", ";
+            cout << endl;
+
+            {
+                Guloso guloso_reativo(grafo, ALFAS, ITERACOES, ITERACOES_POR_BLOCO, SEED);
+                
+                // A posse desse memória é do Guloso, cabe a ele liberar
+                Grafo* solReativa = guloso_reativo.rodar_reativo();
+                
+                if (!solReativa)
+                    throw runtime_error("Não foi gerada solução");
+
+                cout << "Reativo: " << 
+                guloso_reativo.custo_da_solucao(solReativa);
+                cout << endl;
+            }
+
         }
 
         delete grafo;

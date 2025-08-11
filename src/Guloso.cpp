@@ -57,8 +57,8 @@ Guloso::Guloso(
     probs_alfas.assign(tam_alfa, 1.0f / tam_alfa);     
     custo_alfas.assign(tam_alfa, 0.0f);         
     custo_relat_alfas.assign(tam_alfa, 0.0f); 
-    qtd_alfas.assign(tam_alfa, 0.0f);          
-    custo_media = 0.0f; 
+    qtd_usos_alfas.assign(tam_alfa, 0.0f);          
+    media_custo = 0.0f; 
 
     // Valor padrão -1 pra seed, sinaliza que não foi passada uma seed
     if (seed == -1) {
@@ -114,23 +114,23 @@ void Guloso::atualizar_probs() {
     float soma = 0;
     int contagem = 0;
     for (int i = 0; i < tam_alfas; ++i) {
-        if (qtd_alfas[i] > 0) {
-            soma += (custo_alfas[i] / static_cast<float>((qtd_alfas[i])));
+        if (qtd_usos_alfas[i] > 0) {
+            soma += (custo_alfas[i] / static_cast<float>((qtd_usos_alfas[i])));
             ++contagem;
         }
     }
 
-    custo_media = (contagem > 0) ? (soma / contagem) : VALOR_MINIMO; 
+    media_custo = (contagem > 0) ? (soma / contagem) : VALOR_MINIMO; 
 
     // FIXME: Setar como infinito mata a exploração?
     for (int i = 0; i < tam_alfas; i++)
-        custo_relat_alfas[i] = qtd_alfas[i] > 0 ? custo_alfas[i] / qtd_alfas[i] : custo_media;
+        custo_relat_alfas[i] = qtd_usos_alfas[i] > 0 ? custo_alfas[i] / qtd_usos_alfas[i] : media_custo;
 
     // 2) encontrar F*, melhor custo global
     float f_estrela = 
         (melhor_solucao != nullptr) 
         ? max(static_cast<float>(custo_da_solucao(melhor_solucao)), VALOR_MINIMO)      //mudei algo aqui
-        : max(custo_media, VALOR_MINIMO);
+        : max(media_custo, VALOR_MINIMO);
         
     vector<float> qi(tam_alfas);
 
@@ -166,7 +166,7 @@ void Guloso::atualizar_probs() {
     // Resetar variáveis
     
     fill(custo_alfas.begin(), custo_alfas.end(), 0.0f);
-    fill(qtd_alfas.begin(), qtd_alfas.end(), 0.0f);
+    fill(qtd_usos_alfas.begin(), qtd_usos_alfas.end(), 0.0f);
 }
 
 bool Guloso::atualizar_melhor_solucao(Grafo *solucao) {
@@ -194,7 +194,7 @@ void Guloso::atualizar_custos(int indice_alfa, Grafo *solucao) {
 
     int custo = custo_da_solucao(solucao);
     custo_alfas[indice_alfa] += custo;
-    qtd_alfas[indice_alfa] += 1;
+    qtd_usos_alfas[indice_alfa] += 1;
 }
 
 int Guloso::selecionar_alfa() {
@@ -236,27 +236,27 @@ Grafo* Guloso::rodar_reativo() {
         
         if ((i != 0) && (i % k_bloco == 0)) {
 
-          
-        
-            // BUG:  Valores constantes ao longo das iterações. Remover print dps
-            cout << "Iteração " << i << "\n";
-            for (size_t j = 0; j < alfas.size(); ++j) {
-                cout << "  alfa[" << j << "]=" << alfas[j]
-                    << " prob=" << probs_alfas[j]
-                    << " custo_media=" << (qtd_alfas[j] > 0 ? custo_alfas[j] / qtd_alfas[j] : 0)
-                    << " qtd=" << qtd_alfas[j]       //add isso
-                    << "\n";
-            }
+            // // BUG:  Valores constantes ao longo das iterações. Remover print dps
+            // cout << "Iteração " << i << "\n";
+            // for (size_t j = 0; j < alfas.size(); ++j) {
+            //     cout << "  alfa[" << j << "]=" << alfas[j]
+            //         << " prob=" << probs_alfas[j]
+            //         << " media_custo=" << (qtd_usos_alfas[j] > 0 ? custo_alfas[j] / qtd_usos_alfas[j] : 0)
+            //         << " qtd=" << qtd_usos_alfas[j]       //add isso
+            //         << "\n";
+            // }
 
-            cout << "Melhor custo global: " << custo_da_solucao(melhor_solucao) << "\n\n";
+            // cout << "Melhor custo global: " << custo_da_solucao(melhor_solucao) << "\n\n";
 
-              atualizar_probs();  //troquei de posicao
+            atualizar_probs();
         }
 
         int indice_alfa_eleito = selecionar_alfa();
         float alfa_eleito = alfas[indice_alfa_eleito];
 
-        // Aloca um grafo, transferindo memória 
+        // cout << "alfa eleito: "  << indice_alfa_eleito << endl;
+
+        // Aloca um grafo, transferindo posse da memória 
         solucao = conjunto_dominante_arestas(alfa_eleito);
 
         if (!solucao)
@@ -264,28 +264,35 @@ Grafo* Guloso::rodar_reativo() {
         
         atualizar_custos(indice_alfa_eleito, solucao);
 
-
         int custo = custo_da_solucao(solucao);
-        cout << "[DEBUG] custo solucao alfa " << indice_alfa_eleito << " = " << custo << "\n";
+        // cout << "[DEBUG] custo solucao alfa " << indice_alfa_eleito << " = " << custo << "\n";
 
 
         // // Só liberar memória caso a posse não tenha sido transferida
         // if (!atualizar_melhor_solucao(solucao))
         //     delete solucao;
 
-        // tenta atualizar a melhor solução e captura o retorno
-bool substituiu = atualizar_melhor_solucao(solucao);
+         // tenta atualizar a melhor solução e captura o retorno
+        bool substituiu = atualizar_melhor_solucao(solucao);
+        
+        
+        if (substituiu) {
+            // seguro: atualizar_melhor_solucao retornou true, então melhor_solucao foi
+            // atualizada (ou substituída) e não é nullptr — imprime o custo do clone/ponteiro salvo
+            // cout << "[DEBUG] melhor atualizado, custo melhor_solucao = "
+            //     << custo_da_solucao(melhor_solucao) << "\n";
+            
+            // cout << "Substitui: " << substituiu << " " << i << endl;
 
-if (substituiu) {
-    // seguro: atualizar_melhor_solucao retornou true, então melhor_solucao foi
-    // atualizada (ou substituída) e não é nullptr — imprime o custo do clone/ponteiro salvo
-    cout << "[DEBUG] melhor atualizado, custo melhor_solucao = "
-         << custo_da_solucao(melhor_solucao) << "\n";
-} else {
-    // não substituiu: liberar a solução temporária (evita leak)
-    delete solucao;
-}
+            __ultima_iteracao_subst__ = i;
+
+        } else {
+            // não substituiu: liberar a solução temporária (evita leak)
+            delete solucao;
+        }
     }
+
+    // cout << "última iter sub: " << __ultima_iteracao_subst__ << endl;
 
     return melhor_solucao;
 }

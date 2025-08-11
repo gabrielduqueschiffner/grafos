@@ -23,16 +23,17 @@ private:
     vector<float> alfas;
     int max_iter;
     int k_bloco;
+    int __ultima_iteracao_subst__ = -1;
 
     vector<float> probs_alfas; // probabilidade de cada alfa ser escolhido p_i
     vector<float> custo_alfas; // custo absoluta de cada alfa
     vector<float> custo_relat_alfas; // custo relativa de cada alfa
 
-    vector<float> qtd_alfas; // quantidade de soluções encontradas para cada alfa
+    vector<float> qtd_usos_alfas; // quantidade de soluções encontradas para cada alfa
     float delta;  // expoente das fórmulas qi = (F*/Mi)^δ , usado para elevar as diferenças
 
 
-    float custo_media;
+    float media_custo;
     Grafo* melhor_solucao;
 
     //metodos
