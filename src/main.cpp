@@ -10,35 +10,40 @@
 
 const int INFINITO = numeric_limits<int>::max();
 
+// Constantes de execução
 const int SEED = -1;
+
+// Constantes de arquivo
 const string PREFIXO = "instancias/t2/";
 const string SUFIXO = ".txt";
-
 const vector<string> INSTANCIAS = {
     "g_25_0.16_0_1_0",
-    "g_25_0.16_0_1_1",
-    "g_25_0.21_0_1_0",
-    "g_25_0.21_0_1_1",
-    "g_25_0.26_0_1_0",
-    "g_25_0.26_0_1_1",
-    "g_40_0.10_0_1_0",
-    "g_40_0.10_0_1_1",
-    "g_40_0.15_0_1_0",
-    "g_40_0.15_0_1_1",
-    "g_40_0.20_0_1_0",
-    "g_40_0.20_0_1_1",
-    "g_60_0.07_0_1_0",
-    "g_60_0.07_0_1_1",
-    "g_60_0.12_0_1_0",
-    "g_60_0.12_0_1_1",
-    "g_60_0.17_0_1_0",
-    "g_60_0.17_0_1_1",
+    // "g_25_0.16_0_1_1",
+    // "g_25_0.21_0_1_0",
+    // "g_25_0.21_0_1_1",
+    // "g_25_0.26_0_1_0",
+    // "g_25_0.26_0_1_1",
+    // "g_40_0.10_0_1_0",
+    // "g_40_0.10_0_1_1",
+    // "g_40_0.15_0_1_0",
+    // "g_40_0.15_0_1_1",
+    // "g_40_0.20_0_1_0",
+    // "g_40_0.20_0_1_1",
+    // "g_60_0.07_0_1_0",
+    // "g_60_0.07_0_1_1",
+    // "g_60_0.12_0_1_0",
+    // "g_60_0.12_0_1_1",
+    // "g_60_0.17_0_1_0",
+    // "g_60_0.17_0_1_1",
 };
 
+// Parâmetros de repetição
 const int REPETICOES_POR_INSTANCIA = 10;
 const int REPETICOES_POR_ALFA = 30;
 const int ITERACOES = 300;
 const int ITERACOES_POR_BLOCO = 30;
+
+// Critérios de aleatoriedade
 const vector<float> ALFAS = {0.25f, 0.5f, 0.75f};
 
 using namespace std;
