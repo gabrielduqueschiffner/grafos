@@ -14,7 +14,7 @@ class Timer {
     Marca inicio;
     vector<pair<string, Marca>> marcas;
 
-    float delta(Marca marca) {
+    float calc_delta(Marca marca) {
         return chrono::duration<double>(marca - inicio).count();
     }
 
@@ -32,8 +32,8 @@ public:
 
     void imprimir_resultado() {
         
-        cout << "==" << titulo << "==";
+        cout << "==" << titulo << "==" << endl;
         for (auto [label, marca] : marcas)
-            cout << label << ": " << delta(marca) << "s\n";
+            cout << label << ": " << calc_delta(marca) << "s\n";
     }
 };

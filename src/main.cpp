@@ -7,6 +7,7 @@
 #include "../include/LeitorGrafo.h"
 #include "../include/types.h"
 #include "../include/Guloso.h"
+#include "../include/Global.h"
 
 const int INFINITO = numeric_limits<int>::max();
 
@@ -18,23 +19,23 @@ const string PREFIXO = "instancias/t2/";
 const string SUFIXO = ".txt";
 const vector<string> INSTANCIAS = {
     "g_25_0.16_0_1_0",
-    // "g_25_0.16_0_1_1",
-    // "g_25_0.21_0_1_0",
-    // "g_25_0.21_0_1_1",
-    // "g_25_0.26_0_1_0",
-    // "g_25_0.26_0_1_1",
-    // "g_40_0.10_0_1_0",
-    // "g_40_0.10_0_1_1",
-    // "g_40_0.15_0_1_0",
-    // "g_40_0.15_0_1_1",
-    // "g_40_0.20_0_1_0",
-    // "g_40_0.20_0_1_1",
-    // "g_60_0.07_0_1_0",
-    // "g_60_0.07_0_1_1",
-    // "g_60_0.12_0_1_0",
-    // "g_60_0.12_0_1_1",
-    // "g_60_0.17_0_1_0",
-    // "g_60_0.17_0_1_1",
+    "g_25_0.16_0_1_1",
+    "g_25_0.21_0_1_0",
+    "g_25_0.21_0_1_1",
+    "g_25_0.26_0_1_0",
+    "g_25_0.26_0_1_1",
+    "g_40_0.10_0_1_0",
+    "g_40_0.10_0_1_1",
+    "g_40_0.15_0_1_0",
+    "g_40_0.15_0_1_1",
+    "g_40_0.20_0_1_0",
+    "g_40_0.20_0_1_1",
+    "g_60_0.07_0_1_0",
+    "g_60_0.07_0_1_1",
+    "g_60_0.12_0_1_0",
+    "g_60_0.12_0_1_1",
+    "g_60_0.17_0_1_0",
+    "g_60_0.17_0_1_1",
 };
 
 // Parâmetros de repetição
@@ -48,6 +49,8 @@ const vector<float> ALFAS = {0.25f, 0.5f, 0.75f};
 
 using namespace std;
 int main(int argc, char *argv[]) {
+
+    TimerGlobal.marcar("Início");
     
     for (string instancia : INSTANCIAS) {        
     
@@ -77,7 +80,7 @@ int main(int argc, char *argv[]) {
                 
                     delete solEstatica;
                 }
-            }
+            }   
             
             // Imprimir melhores custos random
             cout << "Random: ";
@@ -98,11 +101,16 @@ int main(int argc, char *argv[]) {
                 guloso_reativo.custo_da_solucao(solReativa);
                 cout << endl;
             }
-
         }
 
         delete grafo;
+
+        TimerGlobal.marcar("Fim instância");
     }
+
+    TimerGlobal.marcar("Fim global");
+
+    TimerGlobal.imprimir_resultado();
 
     return 0;
 }
