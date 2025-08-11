@@ -8,13 +8,13 @@
 #include "../include/types.h"
 #include "../include/Guloso.h"
 
-int INFINITO = numeric_limits<int>::max();
+const int INFINITO = numeric_limits<int>::max();
 
-int SEED = -1;
-string PREFIXO = "instancias/t2/";
-string SUFIXO = ".txt";
+const int SEED = -1;
+const string PREFIXO = "instancias/t2/";
+const string SUFIXO = ".txt";
 
-vector<string> INSTANCIAS = {
+const vector<string> INSTANCIAS = {
     "g_25_0.16_0_1_0",
     "g_25_0.16_0_1_1",
     "g_25_0.21_0_1_0",
@@ -35,11 +35,11 @@ vector<string> INSTANCIAS = {
     "g_60_0.17_0_1_1",
 };
 
-int REPETICOES_POR_INSTANCIA = 10;
-int REPETICOES_POR_ALFA = 30;
-int ITERACOES = 300;
-int ITERACOES_POR_BLOCO = 30;
-vector<float> ALFAS = {0.25f, 0.5f, 0.75f};
+const int REPETICOES_POR_INSTANCIA = 10;
+const int REPETICOES_POR_ALFA = 30;
+const int ITERACOES = 300;
+const int ITERACOES_POR_BLOCO = 30;
+const vector<float> ALFAS = {0.25f, 0.5f, 0.75f};
 
 using namespace std;
 int main(int argc, char *argv[]) {
