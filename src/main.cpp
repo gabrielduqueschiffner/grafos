@@ -105,7 +105,8 @@ int main(int argc, char *argv[]) {
 
         delete grafo;
 
-        TimerGlobal.marcar("Fim instância");
+        TimerGlobal.marcar("Fim instância " + instancia);
+        TimerGlobal.imprimir_ultimo();
     }
 
     TimerGlobal.marcar("Fim global");

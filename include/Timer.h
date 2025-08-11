@@ -1,5 +1,6 @@
 #include <iostream>
 #include <chrono>
+#include <ostream>
 #include <string>
 #include <vector>
 
@@ -28,6 +29,17 @@ public:
     void marcar(string label) {
         Marca marca = Clock::now();
         marcas.emplace_back(label, marca);
+    }
+
+    void imprimir_ultimo() {
+     
+        if (marcas.empty()) {
+            cout << "Nenhuma marca registrada.\n";
+            return;
+        }
+
+        auto [label, marca] = marcas.back();
+            cout << label << ": " << calc_delta(marca) << "s" << endl;
     }
 
     void imprimir_resultado() {
