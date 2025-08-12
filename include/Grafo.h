@@ -41,6 +41,7 @@ public:
     int get_ordem();
     vector<No *> get_lista_adj();
 
+    void criar_mapas();
     unordered_map<int, NoId> get_mapa_index_id();
     unordered_map<NoId, int> get_mapa_id_index();
 
@@ -98,7 +99,10 @@ private:
     bool in_direcionado;
     bool in_ponderado_aresta;
     bool in_ponderado_vertice;
-    vector<No *> lista_adj;
+    vector<No*> lista_adj;
+
+    unordered_map<NoId, int> mapa_id_index;
+    unordered_map<int, NoId> mapa_index_id;
 
     // Auxiliares
     void dfs_arvore_aux(int indice_no,

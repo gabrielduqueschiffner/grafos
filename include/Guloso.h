@@ -8,12 +8,14 @@ class Guloso {
 public:
 
     Guloso(Grafo* grafo, int seed=-1);
-    Guloso(Grafo* grafo, vector<float> alfas, int max_iter, int k_bloco, int seed=-1);
+    Guloso(Grafo* grafo, vector<float> alfas, int max_iter, int k_bloco, float delta, int seed=-1);
     ~Guloso();
     Grafo* conjunto_dominante_arestas(float alfa);
     Grafo* rodar_reativo();
 
     int custo_da_solucao(Grafo* solucao);
+
+    vector<float> get_custos_relativos() { return custo_relat_alfas; } 
 
 private:
 

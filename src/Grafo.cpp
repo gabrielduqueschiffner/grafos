@@ -59,6 +59,8 @@ Grafo* Grafo::clone()
     clone->set_ponderado_aresta(in_ponderado_aresta);
     clone->set_ponderado_vertice(in_ponderado_vertice);
 
+    clone->criar_mapas();
+
     return clone;
 }
 
@@ -72,6 +74,7 @@ Grafo::Grafo() {
     in_ponderado_aresta = false;
     in_ponderado_vertice = false;
     lista_adj = {};
+    criar_mapas(); // mapa vazio
 }
 
 Grafo::~Grafo()
@@ -120,8 +123,6 @@ No *Grafo::encontra_no_por_id(NoId id)
 {
 
     // Mudar para que todo grafo sempre tenha os dois mapas
-
-    auto mapa_id_index = get_mapa_id_index();
 
     try
     {
@@ -348,6 +349,8 @@ int Grafo::get_ponderado_aresta() { return in_ponderado_aresta; }
 int Grafo::get_ponderado_vertice() { return in_ponderado_vertice; }
 int Grafo::get_ordem() { return ordem; }
 vector<No *> Grafo::get_lista_adj() { return lista_adj; }
+unordered_map<int, NoId> Grafo::get_mapa_index_id() { return mapa_index_id; }
+unordered_map<NoId, int> Grafo::get_mapa_id_index() { return mapa_id_index; }
 
 // -=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-
 //                               GABRIEL
@@ -591,6 +594,8 @@ Grafo *Grafo::arvore_geradora_minima_kruskal(vector<NoId> ids_nos)
         }
     }
 
+    grafo_kruskal->criar_mapas();
+
     return grafo_kruskal;
 }
 
@@ -645,6 +650,8 @@ Grafo *Grafo::arvore_caminhamento_profundidade(NoId id_no)
         int peso = a->get_peso();
         arvore->adiciona_aresta(u, v, peso);
     }
+
+    arvore->criar_mapas();
 
     return arvore;
 }
@@ -720,6 +727,8 @@ Grafo *Grafo::gera_grafo_transposto()
     transposto->set_direcionado(in_direcionado);
     transposto->set_ponderado_aresta(in_ponderado_aresta);
     transposto->set_ponderado_vertice(in_ponderado_vertice);
+
+    transposto->criar_mapas();
 
     return transposto;
 }
@@ -904,6 +913,8 @@ Grafo *Grafo::arvore_geradora_minima_prim(vector<NoId> ids_subconjunto)
             sao_nos_incluidos.end(),
             true);
     }
+
+    grafo_agm->criar_mapas();
 
     return grafo_agm;
 }
@@ -1128,36 +1139,18 @@ vector<int> Grafo::get_excentricidades()
 // Auxiliares
 // =======================================
 
-unordered_map<NoId, int> Grafo::get_mapa_id_index()
+void Grafo::criar_mapas()
 {
-
-    /* Mapeamento entre ids de nós em indexes {0, 1, 2, ..., ordem}, para uso
-    associado a vetores. */
-
-    unordered_map<NoId, int> mapa_id_index;
-
-    for (int index = 0; index < ordem; index++)
-    {
-        NoId id = lista_adj[index]->get_id();
-        mapa_id_index.insert(pair<NoId, int>(id, index));
-    }
-
-    return mapa_id_index;
-}
-
-unordered_map<int, NoId> Grafo::get_mapa_index_id()
-{
-
     /* Mapeamento entre indexes de vetores em ids de nós, para encontrar um nó
     em um vetor. */
 
-    unordered_map<int, NoId> mapa_index_id;
+    /* Mapeamento entre ids de nós em indexes {0, 1, 2, ..., ordem}, para uso
+    associado a vetores. */
 
     for (int index = 0; index < ordem; index++)
     {
         NoId id = lista_adj[index]->get_id();
         mapa_index_id.insert(pair<int, NoId>(index, id));
+        mapa_id_index.insert(pair<NoId, int>(id, index));
     }
-
-    return mapa_index_id;
 }

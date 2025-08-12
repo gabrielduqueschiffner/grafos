@@ -1,6 +1,7 @@
 #include <iostream>
 #include <chrono>
 #include <ostream>
+#include <stdexcept>
 #include <string>
 #include <vector>
 
@@ -15,8 +16,8 @@ class Timer {
     Marca inicio;
     vector<pair<string, Marca>> marcas;
 
-    float calc_delta(Marca marca) {
-        return chrono::duration<double>(marca - inicio).count();
+    double calc_delta(Marca marca2, Marca marca1) {
+        return chrono::duration<double>(marca2 - marca1).count();
     }
 
 public:
@@ -39,13 +40,17 @@ public:
         }
 
         auto [label, marca] = marcas.back();
-            cout << label << ": " << calc_delta(marca) << "s" << endl;
+            cout << label << ": " << calc_delta(marca, inicio) << "s" << endl;
     }
 
     void imprimir_resultado() {
+
+        if (marcas.size() < 2)
+            throw runtime_error("Sem marcas suficiente");
         
-        cout << "==" << titulo << "==" << endl;
-        for (auto [label, marca] : marcas)
-            cout << label << ": " << calc_delta(marca) << "s\n";
+        for (int i=1; i<marcas.size(); i++) {
+
+            cout << marcas[i].first << ", " << calc_delta(marcas[i].second, marcas[i-1].second) << "s\n";
+        }
     }
 };

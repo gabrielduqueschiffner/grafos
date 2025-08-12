@@ -37,7 +37,7 @@ Guloso::Guloso(Grafo *grafo, int seed) {
 }
 
 Guloso::Guloso(
-    Grafo *grafo, vector<float> alfas, int max_iter, int k_bloco, int seed
+    Grafo *grafo, vector<float> alfas, int max_iter, int k_bloco, float delta, int seed
 ) {
 
     /* Inicializador para realizar guloso reativo */
@@ -50,7 +50,7 @@ Guloso::Guloso(
     this->max_iter = max_iter;
     this->k_bloco = k_bloco;
     this->melhor_solucao = nullptr;
-    this->delta = 1.0f;
+    this->delta = delta;
 
     int tam_alfa = alfas.size(); // Número de alfas
     
@@ -363,7 +363,7 @@ Grafo* Guloso::conjunto_dominante_arestas(float alfa) {
 
         vector<Aresta*> arestas_restantes;
 
-        for (Aresta *aresta : fora) {
+        for (Aresta* aresta : fora) {
 
             int origem = aresta->get_id_no_origem();
             int alvo = aresta->get_id_no_alvo();

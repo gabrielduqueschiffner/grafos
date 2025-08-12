@@ -103,6 +103,8 @@ public:
         }
 
         arquivoEntrada.close();  // Fecha o arquivo após a leitura
+        
+        grafo->criar_mapas();
 
         return grafo;
     }
