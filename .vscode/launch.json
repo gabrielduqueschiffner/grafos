@@ -6,7 +6,7 @@
             "type": "cppdbg",
             "request": "launch",
             "program": "${workspaceFolder}/main.exe",
-            "args": ["instancias/t2/g_40_0.10_0_1_0.txt"],
+            "args": ["instancias/t2/g_60_0.17_0_1_0.txt"],
             "stopAtEntry": false,
             "cwd": "${workspaceFolder}",
             "environment": [],

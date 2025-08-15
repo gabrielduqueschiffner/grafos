@@ -18,24 +18,24 @@ const int SEED = -1;
 const string PREFIXO = "instancias/t2/";
 const string SUFIXO = ".txt";
 const vector<string> INSTANCIAS = {
-    "g_25_0.16_0_1_0",
-    "g_25_0.16_0_1_1",
-    "g_25_0.21_0_1_0",
-    "g_25_0.21_0_1_1",
-    "g_25_0.26_0_1_0",
-    "g_25_0.26_0_1_1",
-    "g_40_0.10_0_1_0",
-    "g_40_0.10_0_1_1",
-    "g_40_0.15_0_1_0",
-    "g_40_0.15_0_1_1",
-    "g_40_0.20_0_1_0",
-    "g_40_0.20_0_1_1",
-    "g_60_0.07_0_1_0",
-    "g_60_0.07_0_1_1",
-    "g_60_0.12_0_1_0",
-    "g_60_0.12_0_1_1",
-    "g_60_0.17_0_1_0",
-    "g_60_0.17_0_1_1",
+    "instancias/t2/g_25_0.16_0_1_0.txt",
+    "instancias/t2/g_25_0.16_0_1_1.txt",
+    "instancias/t2/g_25_0.21_0_1_0.txt",
+    "instancias/t2/g_25_0.21_0_1_1.txt",
+    "instancias/t2/g_25_0.26_0_1_0.txt",
+    "instancias/t2/g_25_0.26_0_1_1.txt",
+    "instancias/t2/g_40_0.10_0_1_0.txt",
+    "instancias/t2/g_40_0.10_0_1_1.txt",
+    "instancias/t2/g_40_0.15_0_1_0.txt",
+    "instancias/t2/g_40_0.15_0_1_1.txt",
+    "instancias/t2/g_40_0.20_0_1_0.txt",
+    "instancias/t2/g_40_0.20_0_1_1.txt",
+    "instancias/t2/g_60_0.07_0_1_0.txt",
+    "instancias/t2/g_60_0.07_0_1_1.txt",
+    "instancias/t2/g_60_0.12_0_1_0.txt",
+    "instancias/t2/g_60_0.12_0_1_1.txt",
+    "instancias/t2/g_60_0.17_0_1_0.txt",
+    "instancias/t2/g_60_0.17_0_1_1.txt",
 };
 
 // Parâmetros de repetição
@@ -61,15 +61,30 @@ void printVec(vector<T> vec) {
 using namespace std;
 int main(int argc, char *argv[]) {
 
+    vector<string> instancias;
+
+    // Se passar instância por linha de comando, 
+    // sobrescrever comportamento padrão
+    if (argc >= 1) 
+        instancias.push_back(argv[1]);
+    else 
+        instancias = INSTANCIAS;
+
     TimerGlobal.marcar("Início");
 
-    printVec(ALFAS);
-    cout << endl;
+    cout << "\n\n" << endl;
+    cout << "VALORES DE ALFA: "; printVec(ALFAS);
+    cout << "\n\n" << endl;
 
-    for (string instancia : INSTANCIAS) {        
+    // CABEÇALHO DA TABELA DE QUALIDADE
 
-        string arquivo = PREFIXO+instancia+SUFIXO;
-        Grafo* grafo = LeitorGrafo::lerDeArquivo(arquivo);
+    cout << "INSTÂNCIA, REPETIÇÃO, ALGORITMO, QUALIDADE(S)" << endl;  
+
+    // GULOSO COMUM
+
+    for (string instancia : instancias) {        
+
+        Grafo* grafo = LeitorGrafo::lerDeArquivo(instancia);
         
         // RANDOM
         for (int i = 0; i < REPETICOES_POR_INSTANCIA; i++) {
@@ -84,19 +99,23 @@ int main(int argc, char *argv[]) {
             delete solEstatica;
         }
 
+
         TimerGlobal.marcar(instancia + ", comum");
     }
     
-    for (string instancia : INSTANCIAS) {        
+    // GULOSO ALEATÓRIO
 
-        string arquivo = PREFIXO+instancia+SUFIXO;
-        Grafo* grafo = LeitorGrafo::lerDeArquivo(arquivo);
+    for (string instancia : instancias) {        
+
+        Grafo* grafo = LeitorGrafo::lerDeArquivo(instancia);
         
         // RANDOM
         for (int i = 0; i < REPETICOES_POR_INSTANCIA; i++) {
 
             vector<int> melhor_custo_alfas;
+            vector<Grafo*> melhor_solucoes_alfas;
             melhor_custo_alfas.assign(ALFAS.size(), INFINITO);
+            melhor_solucoes_alfas.assign(ALFAS.size(), nullptr);
 
             for (int indice_alfa = 0; indice_alfa < ALFAS.size(); indice_alfa++) {
                 
@@ -109,7 +128,7 @@ int main(int argc, char *argv[]) {
                     int custo = guloso_random.custo_da_solucao(solRandom);
                     if (custo < melhor_custo_alfas[indice_alfa])
                         melhor_custo_alfas[indice_alfa] = custo;
-                
+                    
                     delete solRandom;
                 }
             }   
@@ -124,17 +143,17 @@ int main(int argc, char *argv[]) {
         TimerGlobal.marcar(instancia + ", random");
     }
 
-    for (string instancia : INSTANCIAS) { 
+    // GULOSO REATIVO
 
-        string arquivo = PREFIXO+instancia+SUFIXO;
-        Grafo* grafo = LeitorGrafo::lerDeArquivo(arquivo);
+    for (string instancia : instancias) { 
 
-        // REATIVO
+        Grafo* grafo = LeitorGrafo::lerDeArquivo(instancia);
+
         for (int i = 0; i < REPETICOES_POR_INSTANCIA; i++) {
             
             Guloso guloso_reativo(grafo, ALFAS, ITERACOES, ITERACOES_POR_BLOCO, DELTA, SEED);
             
-            // A posse desse memória é do Guloso, cabe a ele liberar
+            // A posse dessa memória é do Guloso, cabe a ele liberar
             Grafo* solReativa = guloso_reativo.rodar_reativo();
             
             if (!solReativa)
@@ -152,6 +171,11 @@ int main(int argc, char *argv[]) {
     }
 
     TimerGlobal.marcar("Fim global");
+    cout << "\n\n" << endl;
+
+    // CABEÇALHO DA TABELA DE TEMPO TOTAL
+
+    cout << "INSTÂNCIA, ALGORITMO, TEMPO_TOTAL" << endl;  
 
     TimerGlobal.imprimir_resultado();
 
